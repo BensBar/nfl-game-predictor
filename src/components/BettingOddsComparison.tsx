@@ -8,10 +8,10 @@ import { Spinner } from '@/components/ui/spinner'
 import { BettingComparison, BettingOdds, NFLTeam } from '@/types/nfl'
 import { getBettingOddsComparison } from '@/lib/betting-api'
 import { 
-  TrendingUp, 
-  TrendingDown, 
+  TrendUp, 
+  TrendDown, 
   Minus, 
-  DollarSign, 
+  CurrencyDollar, 
   Clock, 
   Users,
   Target,
@@ -62,8 +62,8 @@ export function BettingOddsComparison({ homeTeam, awayTeam, gameId }: BettingOdd
 
   const getSpreadTrend = (current: number, previous?: number) => {
     if (!previous) return <Minus className="w-4 h-4 text-muted-foreground" />
-    if (current > previous) return <TrendingUp className="w-4 h-4 text-green-500" />
-    if (current < previous) return <TrendingDown className="w-4 h-4 text-red-500" />
+    if (current > previous) return <TrendUp className="w-4 h-4 text-green-500" />
+    if (current < previous) return <TrendDown className="w-4 h-4 text-red-500" />
     return <Minus className="w-4 h-4 text-muted-foreground" />
   }
 
@@ -80,7 +80,7 @@ export function BettingOddsComparison({ homeTeam, awayTeam, gameId }: BettingOdd
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="text-primary" />
+            <CurrencyDollar className="text-primary" />
             Betting Odds Comparison
           </CardTitle>
         </CardHeader>
@@ -101,7 +101,7 @@ export function BettingOddsComparison({ homeTeam, awayTeam, gameId }: BettingOdd
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="text-primary" />
+            <CurrencyDollar className="text-primary" />
             Betting Odds Comparison
           </CardTitle>
         </CardHeader>
@@ -122,7 +122,7 @@ export function BettingOddsComparison({ homeTeam, awayTeam, gameId }: BettingOdd
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <DollarSign className="text-primary" />
+            <CurrencyDollar className="text-primary" />
             Betting Odds Comparison
             <Badge variant="secondary" className="ml-auto">
               Live Odds
@@ -273,7 +273,7 @@ export function BettingOddsComparison({ homeTeam, awayTeam, gameId }: BettingOdd
                 <Card className="border-orange-200 bg-orange-50/30">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
+                      <TrendUp className="w-5 h-5" />
                       Over {bettingData.averageTotal}
                     </CardTitle>
                   </CardHeader>
@@ -298,7 +298,7 @@ export function BettingOddsComparison({ homeTeam, awayTeam, gameId }: BettingOdd
                 <Card className="border-purple-200 bg-purple-50/30">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <TrendingDown className="w-5 h-5" />
+                      <TrendDown className="w-5 h-5" />
                       Under {bettingData.averageTotal}
                     </CardTitle>
                   </CardHeader>

@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { NFLTeam, PredictionFactor } from '@/types/nfl'
-import { Trophy, Target, LinkSimple, Database, CloudRain, FirstAid, TrendingUp, House, ChartLine } from '@phosphor-icons/react'
+import { Trophy, Target, LinkSimple, Database, CloudRain, FirstAid, TrendUp, House, ChartLine } from '@phosphor-icons/react'
 
 interface PredictionResultProps {
   homeTeam: NFLTeam
@@ -50,7 +50,7 @@ export function PredictionResult({
       case 'Odds':
         return <ChartLine size={14} className="text-yellow-600" />
       case 'Historical':
-        return <TrendingUp size={14} className="text-purple-600" />
+        return <TrendUp size={14} className="text-purple-600" />
       case 'Home Field':
         return <House size={14} className="text-orange-600" />
       default:

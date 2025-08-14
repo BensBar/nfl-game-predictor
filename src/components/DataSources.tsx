@@ -9,13 +9,13 @@ import {
   Info, 
   Calculator, 
   Calendar, 
-  Wifi, 
+  WifiHigh, 
   Activity, 
   Cloud,
-  DollarSign,
+  CurrencyDollar,
   Gauge,
   CheckCircle,
-  AlertTriangle
+  Warning
 } from '@phosphor-icons/react'
 
 export function DataSources() {
@@ -40,7 +40,7 @@ export function DataSources() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wifi className="text-primary" />
+              <WifiHigh className="text-primary" />
               Live Data APIs
             </CardTitle>
           </CardHeader>
@@ -104,7 +104,7 @@ export function DataSources() {
               </div>
 
               <div className="flex items-center gap-3">
-                <AlertTriangle className="text-orange-600" size={20} />
+                <Warning className="text-orange-600" size={20} />
                 <div>
                   <div className="font-medium">Live Injury Reports</div>
                   <div className="text-sm text-muted-foreground">Real-time player status with impact analysis</div>
@@ -120,7 +120,7 @@ export function DataSources() {
               </div>
 
               <div className="flex items-center gap-3">
-                <DollarSign className="text-purple-600" size={20} />
+                <CurrencyDollar className="text-purple-600" size={20} />
                 <div>
                   <div className="font-medium">The Odds API</div>
                   <div className="text-sm text-muted-foreground">Real sportsbook lines and market data</div>

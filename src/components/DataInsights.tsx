@@ -9,11 +9,11 @@ import {
   CloudRain, 
   Thermometer, 
   Wind, 
-  TrendingUp, 
-  TrendingDown,
-  DollarSign,
+  TrendUp, 
+  TrendDown,
+  CurrencyDollar,
   Activity,
-  AlertTriangle,
+  Warning,
   CheckCircle,
   Clock
 } from '@phosphor-icons/react'
@@ -42,8 +42,8 @@ export function DataInsights({ homeTeam, awayTeam, gameId }: DataInsightsProps) 
 
   const getInjuryStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'out': return <AlertTriangle size={12} className="text-red-600" />
-      case 'doubtful': return <AlertTriangle size={12} className="text-red-500" />
+      case 'out': return <Warning size={12} className="text-red-600" />
+      case 'doubtful': return <Warning size={12} className="text-red-500" />
       case 'questionable': return <Clock size={12} className="text-yellow-600" />
       case 'probable': return <CheckCircle size={12} className="text-green-600" />
       default: return <Activity size={12} className="text-muted-foreground" />
@@ -84,7 +84,7 @@ export function DataInsights({ homeTeam, awayTeam, gameId }: DataInsightsProps) 
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <AlertTriangle className="text-primary" size={20} />
+                  <Warning className="text-primary" size={20} />
                   {homeTeam.city} Injury Report
                 </CardTitle>
               </CardHeader>
@@ -125,7 +125,7 @@ export function DataInsights({ homeTeam, awayTeam, gameId }: DataInsightsProps) 
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <AlertTriangle className="text-primary" size={20} />
+                  <Warning className="text-primary" size={20} />
                   {awayTeam.city} Injury Report
                 </CardTitle>
               </CardHeader>
@@ -234,7 +234,7 @@ export function DataInsights({ homeTeam, awayTeam, gameId }: DataInsightsProps) 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <DollarSign className="text-primary" />
+                <CurrencyDollar className="text-primary" />
                 Current Betting Lines
               </CardTitle>
             </CardHeader>
@@ -290,7 +290,7 @@ export function DataInsights({ homeTeam, awayTeam, gameId }: DataInsightsProps) 
                 </div>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
-                  <DollarSign size={48} className="mx-auto mb-4 opacity-50" />
+                  <CurrencyDollar size={48} className="mx-auto mb-4 opacity-50" />
                   <p>Betting lines not available</p>
                 </div>
               )}
@@ -303,7 +303,7 @@ export function DataInsights({ homeTeam, awayTeam, gameId }: DataInsightsProps) 
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="text-green-600" />
+                  <TrendUp className="text-green-600" />
                   Positive Indicators
                 </CardTitle>
               </CardHeader>
@@ -330,17 +330,17 @@ export function DataInsights({ homeTeam, awayTeam, gameId }: DataInsightsProps) 
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <TrendingDown className="text-yellow-600" />
+                  <TrendDown className="text-yellow-600" />
                   Data Quality Alerts
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
-                  <AlertTriangle size={16} className="text-yellow-600" />
+                  <Warning size={16} className="text-yellow-600" />
                   Historical player data may be incomplete
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <AlertTriangle size={16} className="text-yellow-600" />
+                  <Warning size={16} className="text-yellow-600" />
                   Some APIs experiencing minor delays
                 </div>
                 <div className="flex items-center gap-2 text-sm">

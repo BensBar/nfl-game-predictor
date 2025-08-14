@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AccuracyTracker } from '@/lib/accuracy-tracker'
 import { AccuracyStats, WeeklyAccuracy, LeaderboardEntry } from '@/types/accuracy'
-import { Target, TrendingUp, TrendingDown, Award, Calendar, BarChart3, Trophy, Medal, Star, Zap, Fire } from '@phosphor-icons/react'
+import { Target, TrendUp, TrendDown, Medal, Calendar, ChartBar, Trophy, Medal, Star, Lightning, Fire } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface AccuracyDashboardProps {
@@ -56,9 +56,9 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
   }
 
   const getStreakIcon = (streak: number, isWinning: boolean) => {
-    if (streak >= 10) return isWinning ? <Fire className="text-orange-500" /> : <TrendingDown className="text-red-500" />
-    if (streak >= 5) return isWinning ? <Zap className="text-yellow-500" /> : <TrendingDown className="text-red-500" />
-    return isWinning ? <TrendingUp className="text-green-500" /> : <TrendingDown className="text-red-500" />
+    if (streak >= 10) return isWinning ? <Fire className="text-orange-500" /> : <TrendDown className="text-red-500" />
+    if (streak >= 5) return isWinning ? <Lightning className="text-yellow-500" /> : <TrendDown className="text-red-500" />
+    return isWinning ? <TrendUp className="text-green-500" /> : <TrendDown className="text-red-500" />
   }
 
   const getBadgeIcon = (badge: string) => {
@@ -66,7 +66,7 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
     if (badge.includes('🥇')) return <Medal className="text-yellow-500" />
     if (badge.includes('🥈')) return <Medal className="text-gray-400" />
     if (badge.includes('🔥')) return <Fire className="text-orange-500" />
-    if (badge.includes('⚡')) return <Zap className="text-yellow-500" />
+    if (badge.includes('⚡')) return <Lightning className="text-yellow-500" />
     return <Star className="text-blue-500" />
   }
 
@@ -289,7 +289,7 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="text-primary" />
+                    <ChartBar className="text-primary" />
                     Detailed Analysis
                   </CardTitle>
                 </CardHeader>
@@ -301,7 +301,7 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
                       
                       {stats.byConfidenceLevel.high.accuracy > stats.overall.accuracy + 5 && (
                         <Alert className="border-green-200 bg-green-50/50">
-                          <TrendingUp className="h-4 w-4 text-green-600" />
+                          <TrendUp className="h-4 w-4 text-green-600" />
                           <AlertDescription className="text-green-800">
                             Strong high-confidence performance! Your most confident predictions are {formatAccuracy(stats.byConfidenceLevel.high.accuracy)} accurate.
                           </AlertDescription>
@@ -310,7 +310,7 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
 
                       {stats.recentTrend.last5Games > stats.overall.accuracy + 10 && (
                         <Alert className="border-blue-200 bg-blue-50/50">
-                          <TrendingUp className="h-4 w-4 text-blue-600" />
+                          <TrendUp className="h-4 w-4 text-blue-600" />
                           <AlertDescription className="text-blue-800">
                             Hot streak! Your last 5 predictions are {formatAccuracy(stats.recentTrend.last5Games)} accurate, well above your overall average.
                           </AlertDescription>
@@ -340,7 +340,7 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
 
                       {stats.recentTrend.last5Games < stats.overall.accuracy - 10 && (
                         <Alert className="border-red-200 bg-red-50/50">
-                          <TrendingDown className="h-4 w-4 text-red-600" />
+                          <TrendDown className="h-4 w-4 text-red-600" />
                           <AlertDescription className="text-red-800">
                             Recent dip in performance. Last 5 games: {formatAccuracy(stats.recentTrend.last5Games)} vs overall {formatAccuracy(stats.overall.accuracy)}.
                           </AlertDescription>
@@ -377,7 +377,7 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Award className="text-primary" />
+                    <Medal className="text-primary" />
                     Season Leaderboard
                   </CardTitle>
                 </CardHeader>
@@ -420,7 +420,7 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
                     </div>
                   ) : (
                     <Alert>
-                      <Award className="h-4 w-4" />
+                      <Medal className="h-4 w-4" />
                       <AlertDescription>
                         Leaderboard will populate as you make predictions throughout the season.
                       </AlertDescription>
