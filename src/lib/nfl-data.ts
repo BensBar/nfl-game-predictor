@@ -271,60 +271,94 @@ const getTeam = (id: string): NFLTeam => {
 // Official 2025-26 NFL Schedule including preseason and regular season
 export const generateCompleteNFLSchedule = async (): Promise<NFLGame[]> => {
   const schedule: NFLGame[] = []
-  
-  // Import sports API for real preseason data
-  const { sportsAPI } = await import('./sports-api')
-  
-  // Get real preseason games from API
+
   try {
-    const preseasonWeek3 = await sportsAPI.fetchPreseasonSchedule(-1)
-    schedule.push(...preseasonWeek3)
-    
-    // Add other preseason weeks with placeholder data (they would also come from API in production)
+    // Add preseason week 3 games (Week -1) - August 21-23, 2025
+  const preseasonWeek3Games = [
+    { away: 'pit', home: 'car', time: 'Thu 7:00 PM ET' },
+    { away: 'ne', home: 'nyg', time: 'Thu 8:00 PM ET' },
+    { away: 'phi', home: 'nyj', time: 'Fri 7:30 PM ET' },
+    { away: 'atl', home: 'dal', time: 'Fri 8:00 PM ET' },
+    { away: 'min', home: 'ten', time: 'Fri 8:00 PM ET' },
+    { away: 'chi', home: 'kc', time: 'Fri 8:20 PM ET' },
+    { away: 'bal', home: 'wsh', time: 'Sat 12:00 PM ET' },
+    { away: 'ind', home: 'cin', time: 'Sat 1:00 PM ET' },
+    { away: 'lar', home: 'cle', time: 'Sat 1:00 PM ET' },
+    { away: 'hou', home: 'det', time: 'Sat 1:00 PM ET' },
+    { away: 'den', home: 'no', time: 'Sat 1:00 PM ET' },
+    { away: 'sea', home: 'gb', time: 'Sat 4:00 PM ET' },
+    { away: 'jax', home: 'mia', time: 'Sat 7:00 PM ET' },
+    { away: 'buf', home: 'tb', time: 'Sat 7:30 PM ET' },
+    { away: 'lac', home: 'sf', time: 'Sat 8:30 PM ET' },
+    { away: 'lv', home: 'ari', time: 'Sat 10:00 PM ET' }
+  ]
+
+  // Add preseason week 3 to schedule
+  preseasonWeek3Games.forEach((gameData) => {
+    try {
+      const gameId = `ps3g${gameData.away}${gameData.home}`
+      const homeTeam = getTeam(gameData.home)
+      const awayTeam = getTeam(gameData.away)
+      
+      schedule.push({
+        id: gameId,
+        week: -1,
+        homeTeam,
+        awayTeam,
+        gameTime: gameData.time,
+        isCompleted: false,
+        isPreseason: true
+      })
+    } catch (error) {
+      console.error(`Error creating preseason week 3 game: ${gameData.away} @ ${gameData.home}`, error)
+    }
+  })
+
+  // 2025 Preseason Schedule - Updated with correct data
     const preseasonGames = [
-      // Preseason Week 1 (Week -3)
+      // Preseason Week 1 (Week -3) - August 7-10, 2025
       [
-        { away: 'dal', home: 'lar', time: 'Sat 10:00 PM ET' },
-        { away: 'buf', home: 'chi', time: 'Thu 8:00 PM ET' },
-        { away: 'ne', home: 'car', time: 'Thu 7:00 PM ET' },
-        { away: 'nyj', home: 'det', time: 'Thu 7:00 PM ET' },
-        { away: 'mia', home: 'atl', time: 'Fri 7:00 PM ET' },
-        { away: 'pit', home: 'hou', time: 'Fri 8:00 PM ET' },
-        { away: 'lac', home: 'sea', time: 'Sat 10:00 PM ET' },
-        { away: 'sf', home: 'no', time: 'Sun 8:00 PM ET' },
-        { away: 'kc', home: 'jax', time: 'Sat 7:00 PM ET' },
-        { away: 'cle', home: 'gb', time: 'Sat 8:00 PM ET' },
-        { away: 'cin', home: 'tb', time: 'Sat 7:30 PM ET' },
-        { away: 'bal', home: 'phi', time: 'Fri 7:30 PM ET' },
-        { away: 'wsh', home: 'nyg', time: 'Thu 7:00 PM ET' },
-        { away: 'ten', home: 'sf', time: 'Sat 9:00 PM ET' },
-        { away: 'ind', home: 'den', time: 'Sun 9:00 PM ET' },
-        { away: 'lv', home: 'min', time: 'Sat 4:00 PM ET' }
+        { away: 'ind', home: 'bal', time: 'Thu 7:00 PM ET' },
+        { away: 'cin', home: 'phi', time: 'Thu 7:30 PM ET' },
+        { away: 'lv', home: 'sea', time: 'Thu 10:00 PM ET' },
+        { away: 'det', home: 'atl', time: 'Fri 7:00 PM ET' },
+        { away: 'cle', home: 'car', time: 'Fri 7:00 PM ET' },
+        { away: 'wsh', home: 'ne', time: 'Fri 7:30 PM ET' },
+        { away: 'nyg', home: 'buf', time: 'Sat 1:00 PM ET' },
+        { away: 'hou', home: 'min', time: 'Sat 4:00 PM ET' },
+        { away: 'pit', home: 'jax', time: 'Sat 7:00 PM ET' },
+        { away: 'dal', home: 'lar', time: 'Sat 7:00 PM ET' },
+        { away: 'ten', home: 'tb', time: 'Sat 7:30 PM ET' },
+        { away: 'kc', home: 'ari', time: 'Sat 8:00 PM ET' },
+        { away: 'nyj', home: 'gb', time: 'Sat 8:00 PM ET' },
+        { away: 'den', home: 'sf', time: 'Sat 8:30 PM ET' },
+        { away: 'mia', home: 'chi', time: 'Sun 1:00 PM ET' },
+        { away: 'no', home: 'lac', time: 'Sun 4:05 PM ET' }
       ],
-      // Preseason Week 2 (Week -2)
+      // Preseason Week 2 (Week -2) - August 15-18, 2025
       [
-        { away: 'atl', home: 'mia', time: 'Fri 7:00 PM ET' },
-        { away: 'car', home: 'nyj', time: 'Sat 1:00 PM ET' },
-        { away: 'chi', home: 'cin', time: 'Sat 7:00 PM ET' },
-        { away: 'det', home: 'pit', time: 'Sat 7:00 PM ET' },
-        { away: 'gb', home: 'den', time: 'Sun 8:00 PM ET' },
-        { away: 'hou', home: 'nyg', time: 'Sat 7:00 PM ET' },
-        { away: 'jax', home: 'tb', time: 'Sat 7:30 PM ET' },
-        { away: 'min', home: 'cle', time: 'Sat 4:30 PM ET' },
-        { away: 'no', home: 'lac', time: 'Sat 10:00 PM ET' },
-        { away: 'phi', home: 'ne', time: 'Thu 7:00 PM ET' },
-        { away: 'sea', home: 'ten', time: 'Sat 7:00 PM ET' },
-        { away: 'sf', home: 'lv', time: 'Fri 10:30 PM ET' },
-        { away: 'lar', home: 'lac', time: 'Sat 10:00 PM ET' },
-        { away: 'kc', home: 'ari', time: 'Fri 10:00 PM ET' },
-        { away: 'buf', home: 'bal', time: 'Wed 7:30 PM ET' },
-        { away: 'wsh', home: 'dal', time: 'Sat 8:00 PM ET' }
+        { away: 'ten', home: 'atl', time: 'Fri 7:00 PM ET' },
+        { away: 'kc', home: 'sea', time: 'Fri 10:00 PM ET' },
+        { away: 'mia', home: 'det', time: 'Sat 1:00 PM ET' },
+        { away: 'car', home: 'hou', time: 'Sat 1:00 PM ET' },
+        { away: 'gb', home: 'ind', time: 'Sat 1:00 PM ET' },
+        { away: 'ne', home: 'min', time: 'Sat 1:00 PM ET' },
+        { away: 'cle', home: 'phi', time: 'Sat 1:00 PM ET' },
+        { away: 'sf', home: 'lv', time: 'Sat 4:00 PM ET' },
+        { away: 'bal', home: 'dal', time: 'Sat 7:00 PM ET' },
+        { away: 'lac', home: 'lar', time: 'Sat 7:00 PM ET' },
+        { away: 'nyj', home: 'nyg', time: 'Sat 7:00 PM ET' },
+        { away: 'tb', home: 'pit', time: 'Sat 7:00 PM ET' },
+        { away: 'ari', home: 'den', time: 'Sat 9:30 PM ET' },
+        { away: 'jax', home: 'no', time: 'Sun 1:00 PM ET' },
+        { away: 'buf', home: 'chi', time: 'Sun 8:00 PM ET' },
+        { away: 'cin', home: 'wsh', time: 'Mon 8:00 PM ET' }
       ]
     ]
     
     // Add remaining preseason weeks (Week -3, -2)
     preseasonGames.forEach((weekGames, weekIndex) => {
-      const week = weekIndex - 3 // -3, -2
+      const week = -3 + weekIndex // -3, -2
       
       weekGames.forEach((gameData) => {
         try {
@@ -346,9 +380,9 @@ export const generateCompleteNFLSchedule = async (): Promise<NFLGame[]> => {
         }
       })
     })
+
   } catch (error) {
-    console.error('Error fetching preseason data from API:', error)
-    // Fallback to hardcoded data if API fails
+    console.error('Error adding preseason games:', error)
   }
 
   // Define the exact regular season schedule data from the provided source

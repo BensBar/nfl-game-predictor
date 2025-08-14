@@ -203,7 +203,7 @@ function App() {
               <Info className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800">
                 {selectedGame?.isPreseason 
-                  ? '✅ Preseason Week 3 schedule updated with correct games from ESPN API - ready for tonight\'s testing!'
+                  ? '✅ Preseason schedule updated with correct 2025 games - ready for testing tonight!'
                   : 'This prediction uses simulated data for demonstration purposes. See the "Data Sources" tab for methodology details.'
                 }
               </AlertDescription>

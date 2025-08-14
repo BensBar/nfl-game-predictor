@@ -29,10 +29,10 @@ export function DataSources() {
 
   return (
     <div className="space-y-6">
-      <Alert className="border-blue-200 bg-blue-50/50">
+        <Alert className="border-blue-200 bg-blue-50/50">
         <Activity className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800">
-          <strong>Live Preseason Data:</strong> Week 3 preseason games are now pulled directly from NFL APIs with accurate schedules and game times. Perfect for testing predictions tonight!
+          <strong>Official 2025 Preseason Schedule:</strong> All preseason games now use the official NFL 2025 schedule data. Currently showing Week 3 preseason games for tonight's testing!
         </AlertDescription>
       </Alert>
 
@@ -90,8 +90,8 @@ export function DataSources() {
               <div className="flex items-center gap-3">
                 <Calendar className="text-emerald-600" size={20} />
                 <div>
-                  <div className="font-medium">Preseason Schedule (Week 3)</div>
-                  <div className="text-sm text-muted-foreground">Live from ESPN & NFL.com APIs</div>
+                  <div className="font-medium">Official 2025 NFL Schedule</div>
+                  <div className="text-sm text-muted-foreground">Complete preseason & regular season</div>
                 </div>
               </div>
 
