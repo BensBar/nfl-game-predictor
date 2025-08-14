@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Toaster } from '@/components/ui/sonner'
 import { getCurrentWeek, getGamesForWeek, calculatePrediction } from '@/lib/nfl-data'
 import { NFLGame, Prediction, PredictionHistory } from '@/types/nfl'
@@ -11,7 +12,8 @@ import { PredictionResult } from '@/components/PredictionResult'
 import { TeamComparison } from '@/components/TeamComparison'
 import { PredictionHistoryComponent } from '@/components/PredictionHistory'
 import { WeeklySchedule } from '@/components/WeeklySchedule'
-import { Target, ChartBar, Clock, Calendar } from '@phosphor-icons/react'
+import { DataSources } from '@/components/DataSources'
+import { Target, ChartBar, Clock, Calendar, Database, Info } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 function App() {
@@ -110,8 +112,11 @@ function App() {
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary mb-2">NFL 2025-26 Season Predictor</h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-muted-foreground mb-1">
             Advanced analytics for the upcoming NFL season
+          </p>
+          <p className="text-sm text-muted-foreground/80">
+            Demo app using simulated data • View "Data Sources" tab for details
           </p>
         </div>
 
@@ -180,6 +185,13 @@ function App() {
 
         {currentPrediction && selectedGame && (
           <div className="space-y-6">
+            <Alert className="border-amber-200 bg-amber-50/50">
+              <Info className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                This prediction uses simulated data for demonstration purposes. See the "Data Sources" tab for methodology details.
+              </AlertDescription>
+            </Alert>
+
             <div className="flex justify-center">
               <Button 
                 onClick={handleSavePrediction}
@@ -191,7 +203,7 @@ function App() {
             </div>
 
             <Tabs defaultValue="prediction" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="prediction" className="flex items-center gap-2">
                   <Target size={16} />
                   Prediction
@@ -203,6 +215,10 @@ function App() {
                 <TabsTrigger value="schedule" className="flex items-center gap-2">
                   <Calendar size={16} />
                   Schedule
+                </TabsTrigger>
+                <TabsTrigger value="sources" className="flex items-center gap-2">
+                  <Database size={16} />
+                  Data Sources
                 </TabsTrigger>
                 <TabsTrigger value="history" className="flex items-center gap-2">
                   <Clock size={16} />
@@ -235,6 +251,10 @@ function App() {
                   selectedGame={selectedGame}
                   onGameSelect={handleGameSelect}
                 />
+              </TabsContent>
+
+              <TabsContent value="sources">
+                <DataSources />
               </TabsContent>
 
               <TabsContent value="history">
