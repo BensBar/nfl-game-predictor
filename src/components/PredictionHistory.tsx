@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PredictionHistory } from '@/types/nfl'
-import { Trash2, Clock } from '@phosphor-icons/react'
+import { Trash, Clock } from '@phosphor-icons/react'
 
 interface PredictionHistoryProps {
   predictions: PredictionHistory[]
@@ -65,7 +65,7 @@ export function PredictionHistoryComponent({
               onClick={onClearHistory}
               className="text-destructive hover:text-destructive"
             >
-              <Trash2 size={16} />
+              <Trash size={16} />
               Clear
             </Button>
           </div>

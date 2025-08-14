@@ -209,93 +209,360 @@ const getTeam = (id: string): NFLTeam => {
   return team
 }
 
-// Accurate 2025-26 NFL Schedule based on official data
+// Official 2025-26 NFL Schedule based on accurate data provided
 export const generateCompleteNFLSchedule = (): NFLGame[] => {
   const schedule: NFLGame[] = []
   
-  // Official 2025-26 NFL Schedule - mapping team abbreviations to their schedule
-  const teamSchedules: Record<string, string[]> = {
-    'ari': ['@no', 'car', '@sf', 'sea', 'ten', '@ind', 'gb', 'bye', '@dal', '@sea', 'sf', 'jax', '@tb', 'lar', '@hou', 'atl', '@cin', '@lar'],
-    'atl': ['tb', '@min', '@car', 'wsh', 'bye', 'buf', '@sf', 'mia', '@ne', '@ind', 'car', '@no', '@nyj', 'sea', '@tb', '@ari', 'lar', 'no'],
-    'bal': ['@buf', 'cle', 'det', '@kc', 'hou', 'lar', 'bye', 'chi', '@mia', '@min', '@cle', 'nyj', 'cin', 'pit', '@cin', 'ne', '@gb', '@pit'],
-    'buf': ['bal', '@nyj', 'mia', 'no', 'ne', '@atl', 'bye', '@car', 'kc', '@mia', 'tb', '@hou', '@pit', 'cin', '@ne', '@cle', 'phi', 'nyj'],
-    'car': ['@jax', '@ari', 'atl', '@ne', 'mia', 'dal', '@nyj', 'buf', '@gb', 'no', '@atl', '@sf', 'lar', 'bye', '@no', 'tb', 'sea', '@tb'],
-    'chi': ['min', '@det', 'dal', '@lv', 'bye', '@wsh', 'no', '@bal', '@cin', 'nyg', '@min', 'pit', '@phi', '@gb', 'cle', 'gb', '@sf', 'det'],
-    'cin': ['@cle', 'jax', '@min', '@den', 'det', '@gb', 'pit', 'nyj', 'chi', 'bye', '@pit', 'ne', '@bal', '@buf', 'bal', '@mia', 'ari', 'cle'],
-    'cle': ['cin', '@bal', 'gb', '@det', 'min', '@pit', 'mia', '@ne', 'bye', '@nyj', 'bal', '@lv', 'sf', 'ten', '@chi', 'buf', 'pit', '@cin'],
-    'dal': ['@phi', 'nyg', '@chi', 'gb', '@nyj', '@car', 'wsh', '@den', 'ari', 'bye', '@lv', 'phi', 'kc', '@det', 'min', 'lac', '@wsh', '@nyg'],
-    'den': ['ten', '@ind', '@lac', 'cin', '@phi', '@nyj', 'nyg', 'dal', '@hou', 'lv', 'kc', 'bye', '@wsh', '@lv', 'gb', 'jax', '@kc', 'lac'],
-    'det': ['@gb', 'chi', '@bal', 'cle', '@cin', '@kc', 'tb', 'bye', 'min', '@wsh', '@phi', 'nyg', 'gb', 'dal', '@lar', 'pit', '@min', '@chi'],
-    'gb': ['det', 'wsh', '@cle', '@dal', 'bye', 'cin', '@ari', '@pit', 'car', 'phi', '@nyg', 'min', '@det', 'chi', '@den', '@chi', 'bal', '@min'],
-    'hou': ['@lar', 'tb', '@jax', 'ten', '@bal', 'bye', '@sea', 'sf', 'den', 'jax', '@ten', 'buf', '@ind', '@kc', 'ari', 'lv', '@lac', 'ind'],
-    'ind': ['mia', 'den', '@ten', '@lar', 'lv', 'ari', '@lac', 'ten', '@pit', 'atl', 'bye', '@kc', 'hou', '@jax', '@sea', 'sf', 'jax', '@hou'],
-    'jax': ['car', '@cin', 'hou', '@sf', 'kc', 'sea', 'lar', 'bye', '@lv', '@hou', 'lac', '@ari', '@ten', 'ind', 'nyj', '@den', '@ind', 'ten'],
-    'kc': ['@lac', 'phi', '@nyg', 'bal', '@jax', 'det', 'lv', 'wsh', '@buf', 'bye', '@den', 'ind', '@dal', 'hou', 'lac', '@ten', 'den', '@lv'],
-    'lv': ['@ne', 'lac', '@wsh', 'chi', '@ind', 'ten', '@kc', 'bye', 'jax', '@den', 'dal', 'cle', '@lac', 'den', '@phi', '@hou', 'nyg', 'kc'],
-    'lar': ['hou', '@ten', '@phi', 'ind', 'sf', '@bal', '@jax', 'bye', 'no', '@sf', 'sea', 'tb', '@car', '@ari', 'det', '@sea', '@atl', 'ari'],
-    'lac': ['kc', '@lv', 'den', '@nyg', 'wsh', '@mia', 'ind', 'min', '@ten', 'pit', '@jax', 'bye', 'lv', 'phi', '@kc', '@dal', 'hou', '@den'],
-    'mia': ['@ind', 'ne', '@buf', 'nyj', '@car', 'lac', '@cle', '@atl', 'bal', 'buf', 'wsh', 'bye', 'no', '@nyj', '@pit', 'cin', 'tb', '@ne'],
-    'min': ['@chi', 'atl', 'cin', '@pit', '@cle', 'bye', 'phi', '@lac', '@det', 'bal', 'chi', '@gb', '@sea', 'wsh', '@dal', '@nyg', 'det', 'gb'],
-    'ne': ['lv', '@mia', 'pit', 'car', '@buf', '@no', '@ten', 'cle', 'atl', '@tb', 'nyj', '@cin', 'nyg', 'bye', 'buf', '@bal', '@nyj', 'mia'],
-    'no': ['ari', 'sf', '@sea', '@buf', 'nyg', 'ne', '@chi', 'tb', '@lar', '@car', 'bye', 'atl', '@mia', '@tb', 'car', 'nyj', '@ten', '@atl'],
-    'nyg': ['@wsh', '@dal', 'kc', 'lac', '@no', 'phi', '@den', '@phi', 'sf', '@chi', 'gb', '@det', '@ne', 'bye', 'wsh', 'min', '@lv', 'dal'],
-    'nyj': ['pit', 'buf', '@tb', '@mia', 'dal', 'den', 'car', '@cin', 'bye', 'cle', '@ne', '@bal', 'atl', 'mia', '@jax', '@no', 'ne', '@buf'],
-    'phi': ['dal', '@kc', 'lar', '@tb', 'den', '@nyg', '@min', 'nyg', 'bye', '@gb', 'det', '@dal', 'chi', '@lac', 'lv', '@wsh', '@buf', 'wsh'],
-    'pit': ['@nyj', 'sea', '@ne', 'min', 'bye', 'cle', '@cin', 'gb', 'ind', '@lac', 'cin', '@chi', 'buf', '@bal', 'mia', '@det', '@cle', 'bal'],
-    'sf': ['@sea', '@no', 'ari', 'jax', '@lar', '@tb', 'atl', '@hou', '@nyg', 'lar', '@ari', 'car', '@cle', 'bye', 'ten', '@ind', 'chi', 'sea'],
-    'sea': ['sf', '@pit', 'no', '@ari', 'tb', '@jax', 'hou', 'bye', '@wsh', 'ari', '@lar', '@ten', 'min', '@atl', 'ind', 'lar', '@car', '@sf'],
-    'tb': ['@atl', '@hou', 'nyj', 'phi', '@sea', 'sf', '@det', '@no', 'bye', 'ne', '@buf', '@lar', 'ari', 'no', 'atl', '@car', '@mia', 'car'],
-    'ten': ['@den', 'lar', 'ind', '@hou', '@ari', '@lv', 'ne', '@ind', 'lac', 'bye', 'hou', 'sea', 'jax', '@cle', '@sf', 'kc', 'no', '@jax'],
-    'wsh': ['nyg', '@gb', 'lv', '@atl', '@lac', 'chi', '@dal', '@kc', 'sea', 'det', '@mia', 'bye', 'den', '@min', '@nyg', 'phi', 'dal', '@phi']
-  }
+  // Define the exact schedule data from the provided source
+  const weeklyGames = [
+    // Week 1
+    [
+      { away: 'dal', home: 'phi', time: 'Thu 8:20 PM ET' },
+      { away: 'kc', home: 'lac', time: 'Fri 8:00 PM ET' },
+      { away: 'ari', home: 'no', time: 'Sun 1:00 PM ET' },
+      { away: 'car', home: 'jax', time: 'Sun 1:00 PM ET' },
+      { away: 'cin', home: 'cle', time: 'Sun 1:00 PM ET' },
+      { away: 'lv', home: 'ne', time: 'Sun 1:00 PM ET' },
+      { away: 'mia', home: 'ind', time: 'Sun 1:00 PM ET' },
+      { away: 'nyg', home: 'wsh', time: 'Sun 1:00 PM ET' },
+      { away: 'pit', home: 'nyj', time: 'Sun 1:00 PM ET' },
+      { away: 'tb', home: 'atl', time: 'Sun 1:00 PM ET' },
+      { away: 'sf', home: 'sea', time: 'Sun 4:05 PM ET' },
+      { away: 'ten', home: 'den', time: 'Sun 4:05 PM ET' },
+      { away: 'det', home: 'gb', time: 'Sun 4:25 PM ET' },
+      { away: 'hou', home: 'lar', time: 'Sun 4:25 PM ET' },
+      { away: 'bal', home: 'buf', time: 'Sun 8:20 PM ET' },
+      { away: 'min', home: 'chi', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 2
+    [
+      { away: 'wsh', home: 'gb', time: 'Thu 8:15 PM ET' },
+      { away: 'buf', home: 'nyj', time: 'Sun 1:00 PM ET' },
+      { away: 'chi', home: 'det', time: 'Sun 1:00 PM ET' },
+      { away: 'cle', home: 'bal', time: 'Sun 1:00 PM ET' },
+      { away: 'jax', home: 'cin', time: 'Sun 1:00 PM ET' },
+      { away: 'lar', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'ne', home: 'mia', time: 'Sun 1:00 PM ET' },
+      { away: 'nyg', home: 'dal', time: 'Sun 1:00 PM ET' },
+      { away: 'sf', home: 'no', time: 'Sun 1:00 PM ET' },
+      { away: 'sea', home: 'pit', time: 'Sun 1:00 PM ET' },
+      { away: 'car', home: 'ari', time: 'Sun 4:05 PM ET' },
+      { away: 'den', home: 'ind', time: 'Sun 4:05 PM ET' },
+      { away: 'phi', home: 'kc', time: 'Sun 4:25 PM ET' },
+      { away: 'atl', home: 'min', time: 'Sun 8:20 PM ET' },
+      { away: 'tb', home: 'hou', time: 'Mon 7:00 PM ET' },
+      { away: 'lac', home: 'lv', time: 'Mon 10:00 PM ET' }
+    ],
+    // Week 3
+    [
+      { away: 'mia', home: 'buf', time: 'Thu 8:15 PM ET' },
+      { away: 'atl', home: 'car', time: 'Sun 1:00 PM ET' },
+      { away: 'cin', home: 'min', time: 'Sun 1:00 PM ET' },
+      { away: 'gb', home: 'cle', time: 'Sun 1:00 PM ET' },
+      { away: 'hou', home: 'jax', time: 'Sun 1:00 PM ET' },
+      { away: 'ind', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'lv', home: 'wsh', time: 'Sun 1:00 PM ET' },
+      { away: 'lar', home: 'phi', time: 'Sun 1:00 PM ET' },
+      { away: 'nyj', home: 'tb', time: 'Sun 1:00 PM ET' },
+      { away: 'pit', home: 'ne', time: 'Sun 1:00 PM ET' },
+      { away: 'den', home: 'lac', time: 'Sun 4:05 PM ET' },
+      { away: 'no', home: 'sea', time: 'Sun 4:05 PM ET' },
+      { away: 'ari', home: 'sf', time: 'Sun 4:25 PM ET' },
+      { away: 'dal', home: 'chi', time: 'Sun 4:25 PM ET' },
+      { away: 'kc', home: 'nyg', time: 'Sun 8:20 PM ET' },
+      { away: 'det', home: 'bal', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 4
+    [
+      { away: 'sea', home: 'ari', time: 'Thu 8:15 PM ET' },
+      { away: 'min', home: 'pit', time: 'Sun 9:30 AM ET' },
+      { away: 'car', home: 'ne', time: 'Sun 1:00 PM ET' },
+      { away: 'cle', home: 'det', time: 'Sun 1:00 PM ET' },
+      { away: 'lac', home: 'nyg', time: 'Sun 1:00 PM ET' },
+      { away: 'no', home: 'buf', time: 'Sun 1:00 PM ET' },
+      { away: 'phi', home: 'tb', time: 'Sun 1:00 PM ET' },
+      { away: 'ten', home: 'hou', time: 'Sun 1:00 PM ET' },
+      { away: 'wsh', home: 'atl', time: 'Sun 1:00 PM ET' },
+      { away: 'ind', home: 'lar', time: 'Sun 4:05 PM ET' },
+      { away: 'jax', home: 'sf', time: 'Sun 4:05 PM ET' },
+      { away: 'bal', home: 'kc', time: 'Sun 4:25 PM ET' },
+      { away: 'chi', home: 'lv', time: 'Sun 4:25 PM ET' },
+      { away: 'gb', home: 'dal', time: 'Sun 8:20 PM ET' },
+      { away: 'nyj', home: 'mia', time: 'Mon 7:15 PM ET' },
+      { away: 'cin', home: 'den', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 5
+    [
+      { away: 'sf', home: 'lar', time: 'Thu 8:15 PM ET' },
+      { away: 'min', home: 'cle', time: 'Sun 9:30 AM ET' },
+      { away: 'dal', home: 'nyj', time: 'Sun 1:00 PM ET' },
+      { away: 'den', home: 'phi', time: 'Sun 1:00 PM ET' },
+      { away: 'hou', home: 'bal', time: 'Sun 1:00 PM ET' },
+      { away: 'lv', home: 'ind', time: 'Sun 1:00 PM ET' },
+      { away: 'mia', home: 'car', time: 'Sun 1:00 PM ET' },
+      { away: 'nyg', home: 'no', time: 'Sun 1:00 PM ET' },
+      { away: 'tb', home: 'sea', time: 'Sun 4:05 PM ET' },
+      { away: 'ten', home: 'ari', time: 'Sun 4:05 PM ET' },
+      { away: 'det', home: 'cin', time: 'Sun 4:25 PM ET' },
+      { away: 'wsh', home: 'lac', time: 'Sun 4:25 PM ET' },
+      { away: 'ne', home: 'buf', time: 'Sun 8:20 PM ET' },
+      { away: 'kc', home: 'jax', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 6
+    [
+      { away: 'phi', home: 'nyg', time: 'Thu 8:15 PM ET' },
+      { away: 'den', home: 'nyj', time: 'Sun 9:30 AM ET' },
+      { away: 'ari', home: 'ind', time: 'Sun 1:00 PM ET' },
+      { away: 'cle', home: 'pit', time: 'Sun 1:00 PM ET' },
+      { away: 'dal', home: 'car', time: 'Sun 1:00 PM ET' },
+      { away: 'lac', home: 'mia', time: 'Sun 1:00 PM ET' },
+      { away: 'lar', home: 'bal', time: 'Sun 1:00 PM ET' },
+      { away: 'sf', home: 'tb', time: 'Sun 1:00 PM ET' },
+      { away: 'sea', home: 'jax', time: 'Sun 1:00 PM ET' },
+      { away: 'ten', home: 'lv', time: 'Sun 4:05 PM ET' },
+      { away: 'cin', home: 'gb', time: 'Sun 4:25 PM ET' },
+      { away: 'ne', home: 'no', time: 'Sun 4:25 PM ET' },
+      { away: 'det', home: 'kc', time: 'Sun 8:20 PM ET' },
+      { away: 'buf', home: 'atl', time: 'Mon 7:15 PM ET' },
+      { away: 'chi', home: 'wsh', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 7
+    [
+      { away: 'pit', home: 'cin', time: 'Thu 8:15 PM ET' },
+      { away: 'lar', home: 'jax', time: 'Sun 9:30 AM ET' },
+      { away: 'car', home: 'nyj', time: 'Sun 1:00 PM ET' },
+      { away: 'lv', home: 'kc', time: 'Sun 1:00 PM ET' },
+      { away: 'mia', home: 'cle', time: 'Sun 1:00 PM ET' },
+      { away: 'ne', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'no', home: 'chi', time: 'Sun 1:00 PM ET' },
+      { away: 'phi', home: 'min', time: 'Sun 1:00 PM ET' },
+      { away: 'ind', home: 'lac', time: 'Sun 4:05 PM ET' },
+      { away: 'nyg', home: 'den', time: 'Sun 4:05 PM ET' },
+      { away: 'gb', home: 'ari', time: 'Sun 4:25 PM ET' },
+      { away: 'wsh', home: 'dal', time: 'Sun 4:25 PM ET' },
+      { away: 'atl', home: 'sf', time: 'Sun 8:20 PM ET' },
+      { away: 'tb', home: 'det', time: 'Mon 7:00 PM ET' },
+      { away: 'hou', home: 'sea', time: 'Mon 10:00 PM ET' }
+    ],
+    // Week 8
+    [
+      { away: 'min', home: 'lac', time: 'Thu 8:15 PM ET' },
+      { away: 'buf', home: 'car', time: 'Sun 1:00 PM ET' },
+      { away: 'chi', home: 'bal', time: 'Sun 1:00 PM ET' },
+      { away: 'cle', home: 'ne', time: 'Sun 1:00 PM ET' },
+      { away: 'mia', home: 'atl', time: 'Sun 1:00 PM ET' },
+      { away: 'nyg', home: 'phi', time: 'Sun 1:00 PM ET' },
+      { away: 'nyj', home: 'cin', time: 'Sun 1:00 PM ET' },
+      { away: 'sf', home: 'hou', time: 'Sun 1:00 PM ET' },
+      { away: 'tb', home: 'no', time: 'Sun 4:05 PM ET' },
+      { away: 'dal', home: 'den', time: 'Sun 4:25 PM ET' },
+      { away: 'ten', home: 'ind', time: 'Sun 4:25 PM ET' },
+      { away: 'gb', home: 'pit', time: 'Sun 8:20 PM ET' },
+      { away: 'wsh', home: 'kc', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 9
+    [
+      { away: 'bal', home: 'mia', time: 'Thu 8:15 PM ET' },
+      { away: 'atl', home: 'ne', time: 'Sun 1:00 PM ET' },
+      { away: 'car', home: 'gb', time: 'Sun 1:00 PM ET' },
+      { away: 'chi', home: 'cin', time: 'Sun 1:00 PM ET' },
+      { away: 'den', home: 'hou', time: 'Sun 1:00 PM ET' },
+      { away: 'ind', home: 'pit', time: 'Sun 1:00 PM ET' },
+      { away: 'lac', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'min', home: 'det', time: 'Sun 1:00 PM ET' },
+      { away: 'sf', home: 'nyg', time: 'Sun 1:00 PM ET' },
+      { away: 'jax', home: 'lv', time: 'Sun 4:05 PM ET' },
+      { away: 'no', home: 'lar', time: 'Sun 4:05 PM ET' },
+      { away: 'kc', home: 'buf', time: 'Sun 4:25 PM ET' },
+      { away: 'sea', home: 'wsh', time: 'Sun 8:20 PM ET' },
+      { away: 'ari', home: 'dal', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 10
+    [
+      { away: 'lv', home: 'den', time: 'Thu 8:15 PM ET' },
+      { away: 'atl', home: 'ind', time: 'Sun 9:30 AM ET' },
+      { away: 'bal', home: 'min', time: 'Sun 1:00 PM ET' },
+      { away: 'buf', home: 'mia', time: 'Sun 1:00 PM ET' },
+      { away: 'cle', home: 'nyj', time: 'Sun 1:00 PM ET' },
+      { away: 'jax', home: 'hou', time: 'Sun 1:00 PM ET' },
+      { away: 'ne', home: 'tb', time: 'Sun 1:00 PM ET' },
+      { away: 'no', home: 'car', time: 'Sun 1:00 PM ET' },
+      { away: 'nyg', home: 'chi', time: 'Sun 1:00 PM ET' },
+      { away: 'ari', home: 'sea', time: 'Sun 4:05 PM ET' },
+      { away: 'det', home: 'wsh', time: 'Sun 4:25 PM ET' },
+      { away: 'lar', home: 'sf', time: 'Sun 4:25 PM ET' },
+      { away: 'pit', home: 'lac', time: 'Sun 8:20 PM ET' },
+      { away: 'phi', home: 'gb', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 11
+    [
+      { away: 'nyj', home: 'ne', time: 'Thu 8:15 PM ET' },
+      { away: 'wsh', home: 'mia', time: 'Sun 9:30 AM ET' },
+      { away: 'car', home: 'atl', time: 'Sun 1:00 PM ET' },
+      { away: 'chi', home: 'min', time: 'Sun 1:00 PM ET' },
+      { away: 'cin', home: 'pit', time: 'Sun 1:00 PM ET' },
+      { away: 'gb', home: 'nyg', time: 'Sun 1:00 PM ET' },
+      { away: 'hou', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'lac', home: 'jax', time: 'Sun 1:00 PM ET' },
+      { away: 'tb', home: 'buf', time: 'Sun 1:00 PM ET' },
+      { away: 'sf', home: 'ari', time: 'Sun 4:05 PM ET' },
+      { away: 'sea', home: 'lar', time: 'Sun 4:05 PM ET' },
+      { away: 'bal', home: 'cle', time: 'Sun 4:25 PM ET' },
+      { away: 'kc', home: 'den', time: 'Sun 4:25 PM ET' },
+      { away: 'det', home: 'phi', time: 'Sun 8:20 PM ET' },
+      { away: 'dal', home: 'lv', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 12
+    [
+      { away: 'buf', home: 'hou', time: 'Thu 8:15 PM ET' },
+      { away: 'ind', home: 'kc', time: 'Sun 1:00 PM ET' },
+      { away: 'min', home: 'gb', time: 'Sun 1:00 PM ET' },
+      { away: 'ne', home: 'cin', time: 'Sun 1:00 PM ET' },
+      { away: 'nyg', home: 'det', time: 'Sun 1:00 PM ET' },
+      { away: 'nyj', home: 'bal', time: 'Sun 1:00 PM ET' },
+      { away: 'pit', home: 'chi', time: 'Sun 1:00 PM ET' },
+      { away: 'sea', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'cle', home: 'lv', time: 'Sun 4:05 PM ET' },
+      { away: 'jax', home: 'ari', time: 'Sun 4:05 PM ET' },
+      { away: 'atl', home: 'no', time: 'Sun 4:25 PM ET' },
+      { away: 'phi', home: 'dal', time: 'Sun 4:25 PM ET' },
+      { away: 'tb', home: 'lar', time: 'Sun 8:20 PM ET' },
+      { away: 'car', home: 'sf', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 13
+    [
+      { away: 'gb', home: 'det', time: 'Thu 1:00 PM ET' },
+      { away: 'kc', home: 'dal', time: 'Thu 4:30 PM ET' },
+      { away: 'cin', home: 'bal', time: 'Thu 8:20 PM ET' },
+      { away: 'chi', home: 'phi', time: 'Fri 3:00 PM ET' },
+      { away: 'ari', home: 'tb', time: 'Sun 1:00 PM ET' },
+      { away: 'atl', home: 'nyj', time: 'Sun 1:00 PM ET' },
+      { away: 'hou', home: 'ind', time: 'Sun 1:00 PM ET' },
+      { away: 'jax', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'lar', home: 'car', time: 'Sun 1:00 PM ET' },
+      { away: 'no', home: 'mia', time: 'Sun 1:00 PM ET' },
+      { away: 'sf', home: 'cle', time: 'Sun 1:00 PM ET' },
+      { away: 'min', home: 'sea', time: 'Sun 4:05 PM ET' },
+      { away: 'buf', home: 'pit', time: 'Sun 4:25 PM ET' },
+      { away: 'lv', home: 'lac', time: 'Sun 4:25 PM ET' },
+      { away: 'den', home: 'wsh', time: 'Sun 8:20 PM ET' },
+      { away: 'nyg', home: 'ne', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 14
+    [
+      { away: 'dal', home: 'det', time: 'Thu 8:15 PM ET' },
+      { away: 'chi', home: 'gb', time: 'Sun 1:00 PM ET' },
+      { away: 'ind', home: 'jax', time: 'Sun 1:00 PM ET' },
+      { away: 'mia', home: 'nyj', time: 'Sun 1:00 PM ET' },
+      { away: 'no', home: 'tb', time: 'Sun 1:00 PM ET' },
+      { away: 'pit', home: 'bal', time: 'Sun 1:00 PM ET' },
+      { away: 'sea', home: 'atl', time: 'Sun 1:00 PM ET' },
+      { away: 'ten', home: 'cle', time: 'Sun 1:00 PM ET' },
+      { away: 'wsh', home: 'min', time: 'Sun 1:00 PM ET' },
+      { away: 'den', home: 'lv', time: 'Sun 4:05 PM ET' },
+      { away: 'cin', home: 'buf', time: 'Sun 4:25 PM ET' },
+      { away: 'lar', home: 'ari', time: 'Sun 4:25 PM ET' },
+      { away: 'hou', home: 'kc', time: 'Sun 8:20 PM ET' },
+      { away: 'phi', home: 'lac', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 15
+    [
+      { away: 'atl', home: 'tb', time: 'Thu 8:15 PM ET' },
+      { away: 'ari', home: 'hou', time: 'Sun 1:00 PM ET' },
+      { away: 'bal', home: 'cin', time: 'Sun 1:00 PM ET' },
+      { away: 'buf', home: 'ne', time: 'Sun 1:00 PM ET' },
+      { away: 'cle', home: 'chi', time: 'Sun 1:00 PM ET' },
+      { away: 'lv', home: 'phi', time: 'Sun 1:00 PM ET' },
+      { away: 'lac', home: 'kc', time: 'Sun 1:00 PM ET' },
+      { away: 'nyj', home: 'jax', time: 'Sun 1:00 PM ET' },
+      { away: 'wsh', home: 'nyg', time: 'Sun 1:00 PM ET' },
+      { away: 'car', home: 'no', time: 'Sun 4:25 PM ET' },
+      { away: 'det', home: 'lar', time: 'Sun 4:25 PM ET' },
+      { away: 'gb', home: 'den', time: 'Sun 4:25 PM ET' },
+      { away: 'ind', home: 'sea', time: 'Sun 4:25 PM ET' },
+      { away: 'ten', home: 'sf', time: 'Sun 4:25 PM ET' },
+      { away: 'min', home: 'dal', time: 'Sun 8:20 PM ET' },
+      { away: 'mia', home: 'pit', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 16
+    [
+      { away: 'lar', home: 'sea', time: 'Thu 8:15 PM ET' },
+      { away: 'gb', home: 'chi', time: 'Sat 1:00 PM ET' },
+      { away: 'phi', home: 'wsh', time: 'Sat 1:00 PM ET' },
+      { away: 'buf', home: 'cle', time: 'Sun 1:00 PM ET' },
+      { away: 'kc', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'lac', home: 'dal', time: 'Sun 1:00 PM ET' },
+      { away: 'min', home: 'nyg', time: 'Sun 1:00 PM ET' },
+      { away: 'ne', home: 'bal', time: 'Sun 1:00 PM ET' },
+      { away: 'nyj', home: 'no', time: 'Sun 1:00 PM ET' },
+      { away: 'tb', home: 'car', time: 'Sun 1:00 PM ET' },
+      { away: 'atl', home: 'ari', time: 'Sun 4:05 PM ET' },
+      { away: 'jax', home: 'den', time: 'Sun 4:05 PM ET' },
+      { away: 'lv', home: 'hou', time: 'Sun 4:25 PM ET' },
+      { away: 'pit', home: 'det', time: 'Sun 4:25 PM ET' },
+      { away: 'cin', home: 'mia', time: 'Sun 8:20 PM ET' },
+      { away: 'sf', home: 'ind', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 17
+    [
+      { away: 'dal', home: 'wsh', time: 'Thu 1:00 PM ET' },
+      { away: 'det', home: 'min', time: 'Thu 4:30 PM ET' },
+      { away: 'den', home: 'kc', time: 'Thu 8:15 PM ET' },
+      { away: 'ari', home: 'cin', time: 'Sat 1:00 PM ET' },
+      { away: 'bal', home: 'gb', time: 'Sat 1:00 PM ET' },
+      { away: 'hou', home: 'lac', time: 'Sat 1:00 PM ET' },
+      { away: 'nyg', home: 'lv', time: 'Sat 1:00 PM ET' },
+      { away: 'sea', home: 'car', time: 'Sat 1:00 PM ET' },
+      { away: 'jax', home: 'ind', time: 'Sun 1:00 PM ET' },
+      { away: 'ne', home: 'nyj', time: 'Sun 1:00 PM ET' },
+      { away: 'no', home: 'ten', time: 'Sun 1:00 PM ET' },
+      { away: 'pit', home: 'cle', time: 'Sun 1:00 PM ET' },
+      { away: 'tb', home: 'mia', time: 'Sun 1:00 PM ET' },
+      { away: 'phi', home: 'buf', time: 'Sun 4:25 PM ET' },
+      { away: 'chi', home: 'sf', time: 'Sun 8:20 PM ET' },
+      { away: 'lar', home: 'atl', time: 'Mon 8:15 PM ET' }
+    ],
+    // Week 18
+    [
+      { away: 'ari', home: 'lar', time: 'Sat 1:00 PM ET' },
+      { away: 'bal', home: 'pit', time: 'Sat 1:00 PM ET' },
+      { away: 'car', home: 'tb', time: 'Sat 1:00 PM ET' },
+      { away: 'cle', home: 'cin', time: 'Sat 1:00 PM ET' },
+      { away: 'dal', home: 'nyg', time: 'Sat 1:00 PM ET' },
+      { away: 'det', home: 'chi', time: 'Sat 1:00 PM ET' },
+      { away: 'gb', home: 'min', time: 'Sat 1:00 PM ET' },
+      { away: 'ind', home: 'hou', time: 'Sat 1:00 PM ET' },
+      { away: 'kc', home: 'lv', time: 'Sat 1:00 PM ET' },
+      { away: 'lac', home: 'den', time: 'Sat 1:00 PM ET' },
+      { away: 'mia', home: 'ne', time: 'Sat 1:00 PM ET' },
+      { away: 'no', home: 'atl', time: 'Sat 1:00 PM ET' },
+      { away: 'nyj', home: 'buf', time: 'Sat 1:00 PM ET' },
+      { away: 'sea', home: 'sf', time: 'Sat 1:00 PM ET' },
+      { away: 'ten', home: 'jax', time: 'Sat 1:00 PM ET' },
+      { away: 'wsh', home: 'phi', time: 'Sat 1:00 PM ET' }
+    ]
+  ]
 
-  // Game time assignments by slot
-  const getGameTime = (weekNum: number, gameIndex: number): string => {
-    // Thursday Night Football (first game of most weeks)
-    if (gameIndex === 0 && weekNum > 1) return 'Thu 8:15 PM ET'
-    // Week 1 Thursday opener
-    if (weekNum === 1 && gameIndex === 0) return 'Thu 8:20 PM ET'
+  // Convert the schedule data to game objects
+  weeklyGames.forEach((weekGames, weekIndex) => {
+    const week = weekIndex + 1
     
-    // Sunday games
-    if (gameIndex < 7) return 'Sun 1:00 PM ET'
-    if (gameIndex < 11) return 'Sun 4:25 PM ET'
-    if (gameIndex === 11) return 'Sun 8:20 PM ET' // Sunday Night Football
-    if (gameIndex === 12) return 'Mon 8:15 PM ET' // Monday Night Football
-    
-    // Additional games get various times
-    return gameIndex < 15 ? 'Sun 1:00 PM ET' : 'Sun 4:25 PM ET'
-  }
-
-  // Convert team schedules to game objects
-  Object.entries(teamSchedules).forEach(([teamId, games]) => {
-    games.forEach((opponent, weekIndex) => {
-      const week = weekIndex + 1
-      
-      // Skip bye weeks
-      if (opponent === 'bye') return
-      
-      // Determine home/away and opponent ID
-      const isAway = opponent.startsWith('@')
-      const opponentId = isAway ? opponent.slice(1) : opponent
-      
-      // Only add game once (when processing home team to avoid duplicates)
-      if (!isAway) {
-        try {
-          const gameId = `w${week}g${teamId}${opponentId}`
-          const homeTeam = getTeam(teamId)
-          const awayTeam = getTeam(opponentId)
-          
-          schedule.push({
-            id: gameId,
-            week,
-            homeTeam,
-            awayTeam,
-            gameTime: getGameTime(week, schedule.filter(g => g.week === week).length),
-            isCompleted: week < getCurrentWeek()
-          })
-        } catch (error) {
-          console.error(`Error creating game: ${teamId} vs ${opponentId} (week ${week})`, error)
-        }
+    weekGames.forEach((gameData) => {
+      try {
+        const gameId = `w${week}g${gameData.away}${gameData.home}`
+        const homeTeam = getTeam(gameData.home)
+        const awayTeam = getTeam(gameData.away)
+        
+        schedule.push({
+          id: gameId,
+          week,
+          homeTeam,
+          awayTeam,
+          gameTime: gameData.time,
+          isCompleted: week < getCurrentWeek()
+        })
+      } catch (error) {
+        console.error(`Error creating game: ${gameData.away} @ ${gameData.home} (week ${week})`, error)
       }
     })
   })

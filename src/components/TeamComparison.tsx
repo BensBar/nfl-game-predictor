@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { NFLTeam, TeamStats, GameResult } from '@/types/nfl'
 import { getTeamStats, getRecentGames } from '@/lib/nfl-data'
-import { TrendingUp, TrendingDown } from '@phosphor-icons/react'
+import { TrendUp, TrendDown } from '@phosphor-icons/react'
 
 interface TeamComparisonProps {
   homeTeam: NFLTeam
