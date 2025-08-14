@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useLiveScores, useAPIStatus } from '@/hooks/useSportsData'
 import { NFLGame } from '@/types/nfl'
+import { LiveGamesGrid } from './LiveGamesGrid'
+import { PredictionService } from '@/lib/prediction-service'
 import { 
   Activity, 
   Wifi, 
@@ -26,20 +27,16 @@ import {
 
 interface LiveDataDashboardProps {
   currentWeekGames: NFLGame[]
-  selectedGame: NFLGame | null
-  onGameSelect: (game: NFLGame) => void
-  onPredict: () => Promise<void>
-  isGeneratingPrediction: boolean
   currentWeek: number
+  onForceRefresh?: () => Promise<void>
+  isRefreshing?: boolean
 }
 
 export function LiveDataDashboard({ 
   currentWeekGames, 
-  selectedGame, 
-  onGameSelect, 
-  onPredict, 
-  isGeneratingPrediction, 
-  currentWeek 
+  currentWeek,
+  onForceRefresh,
+  isRefreshing
 }: LiveDataDashboardProps) {
   const [autoRefresh, setAutoRefresh] = useState(true)
   const { liveScores, loading, error, lastUpdate, refresh } = useLiveScores(autoRefresh ? 30000 : 0)
@@ -155,160 +152,12 @@ export function LiveDataDashboard({
         </TabsList>
 
         <TabsContent value="current-week" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="text-primary" />
-                {currentWeek < 0 
-                  ? `Preseason Week ${Math.abs(currentWeek)} - Game Selection & Prediction` 
-                  : `Week ${currentWeek} - Game Selection & Prediction`
-                }
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Game Selection */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Select Game to Predict</label>
-                  <Select 
-                    value={selectedGame?.id || ''} 
-                    onValueChange={(gameId) => {
-                      const game = currentWeekGames.find(g => g.id === gameId)
-                      if (game) onGameSelect(game)
-                    }}
-                    disabled={(currentWeekGames?.length || 0) === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a game from this week" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(currentWeekGames || []).map((game) => {
-                        // Validate game data before rendering
-                        if (!game?.homeTeam?.city || !game?.awayTeam?.city) {
-                          console.warn('Skipping game with invalid team data:', game)
-                          return null
-                        }
-                        
-                        return (
-                          <SelectItem key={game.id} value={game.id}>
-                            {game.awayTeam.city} @ {game.homeTeam.city} ({game.gameTime})
-                            {game.isCompleted && ' - Completed'}
-                            {game.isPreseason && ' - Preseason'}
-                          </SelectItem>
-                        )
-                      }).filter(Boolean)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Prediction Button */}
-                <div className="flex justify-center">
-                  <Button 
-                    onClick={onPredict}
-                    disabled={!selectedGame || selectedGame?.isCompleted || isGeneratingPrediction}
-                    size="lg"
-                    className="min-w-48"
-                  >
-                    {isGeneratingPrediction ? (
-                      <>
-                        <RefreshCw className="animate-spin mr-2" size={16} />
-                        Analyzing with Live Data...
-                      </>
-                    ) : (
-                      <>
-                        <Target className="mr-2" size={16} />
-                        Generate AI Prediction
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Status Messages */}
-              <div className="space-y-2">
-                {currentWeekGames && currentWeekGames.length === 0 && (
-                  <Alert className="border-yellow-200 bg-yellow-50/50">
-                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                    <AlertDescription className="text-yellow-800">
-                      <strong>No games found</strong> for {currentWeek < 0 ? `Preseason Week ${Math.abs(currentWeek)}` : `Week ${currentWeek}`}. 
-                      Check back during game week or verify the current week setting.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                {currentWeekGames && currentWeekGames.length > 0 && !selectedGame && (
-                  <Alert className="border-blue-200 bg-blue-50/50">
-                    <CheckCircle className="h-4 w-4 text-blue-600" />
-                    <AlertDescription className="text-blue-800">
-                      <strong>Ready:</strong> {currentWeekGames.length} games available for {currentWeek < 0 ? `Preseason Week ${Math.abs(currentWeek)}` : `Week ${currentWeek}`}. 
-                      Select one above to generate real-time predictions.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                {selectedGame && selectedGame.homeTeam?.city && selectedGame.awayTeam?.city && (
-                  <Alert className="border-green-200 bg-green-50/50">
-                    <Target className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800">
-                      <strong>Selected:</strong> {selectedGame.awayTeam.city} @ {selectedGame.homeTeam.city} ({selectedGame.gameTime})
-                      {selectedGame.isPreseason && ' - Preseason Game'}
-                      <br />
-                      <span className="text-xs">Ready to analyze with live team stats, injury reports, weather data & betting odds!</span>
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-
-              {/* Current Week Games List */}
-              {currentWeekGames && currentWeekGames.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-medium text-sm">All Games This Week:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {currentWeekGames.map((game) => (
-                      <Card 
-                        key={game.id} 
-                        className={`cursor-pointer transition-all hover:shadow-md ${
-                          selectedGame?.id === game.id ? 'ring-2 ring-primary' : ''
-                        }`}
-                        onClick={() => onGameSelect(game)}
-                      >
-                        <CardContent className="py-3">
-                          <div className="flex justify-between items-center">
-                            <div className="space-y-1">
-                              <div className="font-medium text-sm">
-                                {game.awayTeam.city} @ {game.homeTeam.city}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {game.gameTime}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-1">
-                              {game.isLive && (
-                                <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
-                                  <Activity size={10} className="mr-1" />
-                                  LIVE
-                                </Badge>
-                              )}
-                              {game.isCompleted && (
-                                <Badge variant="outline" className="text-gray-600 border-gray-600 text-xs">
-                                  FINAL
-                                </Badge>
-                              )}
-                              {game.isPreseason && (
-                                <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
-                                  PRESEASON
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <LiveGamesGrid 
+            games={currentWeekGames || []}
+            currentWeek={currentWeek}
+            onForceRefresh={onForceRefresh}
+            isRefreshing={isRefreshing}
+          />
         </TabsContent>
 
         <TabsContent value="live-scores" className="space-y-4">
