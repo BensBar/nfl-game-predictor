@@ -1,4 +1,5 @@
 import { PlayerInjury, InjuryImpactAnalysis, PositionImpact, NFLTeam } from '@/types/nfl'
+import { realSportsAPI } from './real-sports-api'
 
 // Position importance weights for impact calculation
 const POSITION_WEIGHTS = {
@@ -15,39 +16,6 @@ const POSITION_WEIGHTS = {
   'P': 0.2,       // Punter
   'LS': 0.1,      // Long Snapper
 }
-
-// Simulated injury data for demonstration
-const MOCK_INJURIES: PlayerInjury[] = [
-  {
-    id: 'inj1',
-    playerId: 'p1',
-    playerName: 'Josh Allen',
-    position: 'QB',
-    team: 'BUF',
-    injuryType: 'Shoulder Strain',
-    bodyPart: 'Shoulder',
-    severity: 'Questionable',
-    severityRating: 2,
-    dateReported: '2024-01-15',
-    estimatedReturn: '2024-01-22',
-    gameStatus: 'Limited',
-    impactDescription: 'Minor shoulder strain affecting throwing velocity slightly',
-    lastUpdated: '2024-01-16'
-  },
-  {
-    id: 'inj2',
-    playerId: 'p2',
-    playerName: 'Christian McCaffrey',
-    position: 'RB',
-    team: 'SF',
-    injuryType: 'Calf Strain',
-    bodyPart: 'Calf',
-    severity: 'Doubtful',
-    severityRating: 3,
-    dateReported: '2024-01-14',
-    estimatedReturn: '2024-01-28',
-    gameStatus: 'Inactive',
-    impactDescription: 'Significant calf strain limiting mobility and cutting ability',
     lastUpdated: '2024-01-16'
   },
   {
@@ -79,34 +47,59 @@ const MOCK_INJURIES: PlayerInjury[] = [
     estimatedReturn: '2024-02-05',
     gameStatus: 'Inactive',
     impactDescription: 'Grade 2 hamstring pull, significant offensive impact expected',
-    lastUpdated: '2024-01-16'
-  },
-  {
-    id: 'inj5',
-    playerId: 'p5',
-    playerName: 'T.J. Watt',
-    position: 'LB',
-    team: 'PIT',
-    injuryType: 'Knee Contusion',
-    bodyPart: 'Knee',
-    severity: 'Questionable',
-    severityRating: 1,
-    dateReported: '2024-01-15',
-    gameStatus: 'Limited',
-    impactDescription: 'Minor knee bruising, expected to play with full effectiveness',
-    lastUpdated: '2024-01-16'
+// Get team injuries from real API
+export async function getTeamInjuries(teamAbbreviation: string): Promise<PlayerInjury[]> {
+  try {
+    const injuries = await realSportsAPI.fetchInjuryReport(teamAbbreviation.toLowerCase())
+    
+    // Transform API response to our PlayerInjury format
+    return injuries.map((injury: any, index: number) => ({
+      id: `${teamAbbreviation}-${index}`,
+      playerId: `player-${index}`,
+      playerName: injury.player,
+      position: injury.position,
+      team: teamAbbreviation,
+      injuryType: injury.injury,
+      bodyPart: injury.injury,
+      severity: injury.status,
+      severityRating: injury.severityRating || getSeverityRating(injury.status),
+      dateReported: injury.lastUpdate || new Date().toISOString().split('T')[0],
+      gameStatus: mapStatusToGameStatus(injury.status),
+      impactDescription: `${injury.position} injury - ${injury.status.toLowerCase()}`,
+      lastUpdated: injury.lastUpdate || new Date().toISOString()
+    }))
+  } catch (error) {
+    console.error('Error fetching team injuries:', error)
+    return []
   }
-]
-
-export function getTeamInjuries(teamAbbreviation: string): PlayerInjury[] {
-  return MOCK_INJURIES.filter(injury => injury.team === teamAbbreviation)
 }
 
-export function getAllActiveInjuries(): PlayerInjury[] {
-  return MOCK_INJURIES.filter(injury => 
-    injury.severity !== 'IR' && 
-    injury.gameStatus !== 'Active'
-  )
+// Helper function to convert status to severity rating
+function getSeverityRating(status: string): number {
+  switch (status.toLowerCase()) {
+    case 'out': return 5
+    case 'doubtful': return 4
+    case 'questionable': return 2
+    case 'probable': return 1
+    default: return 1
+  }
+}
+
+// Helper function to map status to game status
+function mapStatusToGameStatus(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'out': return 'Inactive'
+    case 'doubtful': return 'Limited'
+    case 'questionable': return 'Limited'
+    case 'probable': return 'Active'
+    default: return 'Active'
+  }
+}
+
+export async function getAllActiveInjuries(): Promise<PlayerInjury[]> {
+  // In a real implementation, this would fetch from all teams
+  // For now, return empty array as it's not used in current features
+  return []
 }
 
 export function calculatePositionImpact(injuries: PlayerInjury[], position: string): PositionImpact {
@@ -138,8 +131,8 @@ export function calculatePositionImpact(injuries: PlayerInjury[], position: stri
   }
 }
 
-export function analyzeTeamInjuryImpact(team: NFLTeam): InjuryImpactAnalysis {
-  const teamInjuries = getTeamInjuries(team.abbreviation)
+export async function analyzeTeamInjuryImpact(team: NFLTeam): Promise<InjuryImpactAnalysis> {
+  const teamInjuries = await getTeamInjuries(team.abbreviation)
   
   // Calculate offensive impact (QB, RB, WR, TE, OL)
   const offensivePositions = ['QB', 'RB', 'WR', 'TE', 'OL']

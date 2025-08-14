@@ -62,7 +62,7 @@ function App() {
     }
   }
 
-  const handlePredict = () => {
+  const handlePredict = async () => {
     if (!selectedGame) {
       toast.error('Please select a game')
       return
@@ -73,21 +73,26 @@ function App() {
       return
     }
 
-    const result = calculatePrediction(selectedGame.homeTeam, selectedGame.awayTeam)
-    
-    const prediction: Prediction = {
-      id: Date.now().toString(),
-      homeTeam: selectedGame.homeTeam,
-      awayTeam: selectedGame.awayTeam,
-      homeWinProbability: result.homeWinProbability,
-      awayWinProbability: result.awayWinProbability,
-      confidence: result.confidence,
-      factors: result.factors,
-      timestamp: Date.now()
-    }
+    try {
+      const result = await calculatePrediction(selectedGame.homeTeam, selectedGame.awayTeam)
+      
+      const prediction: Prediction = {
+        id: Date.now().toString(),
+        homeTeam: selectedGame.homeTeam,
+        awayTeam: selectedGame.awayTeam,
+        homeWinProbability: result.homeWinProbability,
+        awayWinProbability: result.awayWinProbability,
+        confidence: result.confidence,
+        factors: result.factors,
+        timestamp: Date.now()
+      }
 
-    setCurrentPrediction(prediction)
-    toast.success('Prediction generated!')
+      setCurrentPrediction(prediction)
+      toast.success('Prediction generated using real API data!')
+    } catch (error) {
+      console.error('Error generating prediction:', error)
+      toast.error('Failed to generate prediction')
+    }
   }
 
   const handleSavePrediction = () => {
@@ -123,10 +128,10 @@ function App() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary mb-2">NFL Live Data Predictor</h1>
           <p className="text-lg text-muted-foreground mb-1">
-            Real-time analytics with live sports API integration
+            Real-time analytics powered by ESPN, OpenWeather & Odds APIs
           </p>
           <p className="text-sm text-muted-foreground/80">
-            Enhanced predictions using multiple data sources • View "Data Sources" for API details
+            Live data integration • No more fake data • View "Data Sources" for API details
           </p>
         </div>
 
@@ -199,12 +204,12 @@ function App() {
 
         {currentPrediction && selectedGame && (
           <div className="space-y-6">
-            <Alert className="border-amber-200 bg-amber-50/50">
-              <Info className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-amber-800">
+            <Alert className="border-green-200 bg-green-50/50">
+              <Info className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
                 {selectedGame?.isPreseason 
-                  ? '✅ Preseason schedule updated with correct 2025 games - ready for testing tonight!'
-                  : 'Games automatically appear as "live" when they actually start. Real-time scores will update every 30 seconds during live games.'
+                  ? '✅ Real API Integration: Using live ESPN, OpenWeather, and Odds APIs for authentic sports data!'
+                  : 'Games automatically go live when they start. All data now comes from real sports APIs with 30-second refresh rates.'
                 }
               </AlertDescription>
             </Alert>

@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { NFLTeam, TeamStats, GameResult } from '@/types/nfl'
 import { getTeamStats, getRecentGames } from '@/lib/nfl-data'
-import { TrendUp, TrendDown } from '@phosphor-icons/react'
+import { TrendUp, TrendDown, RefreshCw } from '@phosphor-icons/react'
 
 interface TeamComparisonProps {
   homeTeam: NFLTeam
@@ -11,10 +11,53 @@ interface TeamComparisonProps {
 }
 
 export function TeamComparison({ homeTeam, awayTeam }: TeamComparisonProps) {
-  const homeStats = getTeamStats(homeTeam.id)
-  const awayStats = getTeamStats(awayTeam.id)
-  const homeGames = getRecentGames(homeTeam.id)
-  const awayGames = getRecentGames(awayTeam.id)
+  const [homeStats, setHomeStats] = useState<TeamStats | null>(null)
+  const [awayStats, setAwayStats] = useState<TeamStats | null>(null)
+  const [homeGames, setHomeGames] = useState<GameResult[]>([])
+  const [awayGames, setAwayGames] = useState<GameResult[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const [homeStatsData, awayStatsData, homeGamesData, awayGamesData] = await Promise.all([
+          getTeamStats(homeTeam.id),
+          getTeamStats(awayTeam.id),
+          getRecentGames(homeTeam.id),
+          getRecentGames(awayTeam.id)
+        ])
+        
+        setHomeStats(homeStatsData)
+        setAwayStats(awayStatsData)
+        setHomeGames(homeGamesData)
+        setAwayGames(awayGamesData)
+      } catch (error) {
+        console.error('Error loading team comparison data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [homeTeam.id, awayTeam.id])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <RefreshCw className="animate-spin mr-2" size={20} />
+        Loading real-time team statistics...
+      </div>
+    )
+  }
+
+  if (!homeStats || !awayStats) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        Failed to load team statistics from API
+      </div>
+    )
+  }
 
   const StatRow = ({ 
     label, 

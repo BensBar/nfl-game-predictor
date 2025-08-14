@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -22,7 +22,8 @@ import {
   Users, 
   Activity,
   Clock,
-  Target
+  Target,
+  RefreshCw
 } from '@phosphor-icons/react'
 
 interface InjuryAnalysisProps {
@@ -32,11 +33,45 @@ interface InjuryAnalysisProps {
 
 export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
   const [selectedTeam, setSelectedTeam] = useState<'home' | 'away'>('home')
+  const [homeAnalysis, setHomeAnalysis] = useState<InjuryImpactAnalysis | null>(null)
+  const [awayAnalysis, setAwayAnalysis] = useState<InjuryImpactAnalysis | null>(null)
+  const [homeInjuries, setHomeInjuries] = useState<PlayerInjury[]>([])
+  const [awayInjuries, setAwayInjuries] = useState<PlayerInjury[]>([])
+  const [loading, setLoading] = useState(true)
   
-  const homeAnalysis = analyzeTeamInjuryImpact(homeTeam)
-  const awayAnalysis = analyzeTeamInjuryImpact(awayTeam)
-  const homeInjuries = getTeamInjuries(homeTeam.abbreviation)
-  const awayInjuries = getTeamInjuries(awayTeam.abbreviation)
+  useEffect(() => {
+    const loadInjuryData = async () => {
+      setLoading(true)
+      try {
+        const [homeAnalysisData, awayAnalysisData, homeInjuriesData, awayInjuriesData] = await Promise.all([
+          analyzeTeamInjuryImpact(homeTeam),
+          analyzeTeamInjuryImpact(awayTeam),
+          getTeamInjuries(homeTeam.abbreviation),
+          getTeamInjuries(awayTeam.abbreviation)
+        ])
+        
+        setHomeAnalysis(homeAnalysisData)
+        setAwayAnalysis(awayAnalysisData)
+        setHomeInjuries(homeInjuriesData)
+        setAwayInjuries(awayInjuriesData)
+      } catch (error) {
+        console.error('Error loading injury data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadInjuryData()
+  }, [homeTeam, awayTeam])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <RefreshCw className="animate-spin mr-2" size={20} />
+        Loading real-time injury reports...
+      </div>
+    )
+  }
 
   const currentTeam = selectedTeam === 'home' ? homeTeam : awayTeam
   const currentAnalysis = selectedTeam === 'home' ? homeAnalysis : awayAnalysis

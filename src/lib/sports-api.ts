@@ -1,5 +1,5 @@
 import { NFLTeam, TeamStats, GameResult, NFLGame } from '@/types/nfl'
-import { NFL_TEAMS } from './nfl-data'
+import { realSportsAPI } from './real-sports-api'
 
 // API configuration for different sports data providers
 export interface APIProvider {
@@ -12,108 +12,36 @@ export interface APIProvider {
 
 export const API_PROVIDERS: APIProvider[] = [
   {
-    name: 'ESPN API',
+    name: 'ESPN NFL API',
     baseUrl: 'https://site.api.espn.com/apis/site/v2/sports/football/nfl',
     rateLimit: 60,
-    features: ['scores', 'schedules', 'standings', 'team-stats'],
-    reliability: 95
-  },
-  {
-    name: 'NFL.com API',
-    baseUrl: 'https://api.nfl.com/v3/shield',
-    rateLimit: 100,
-    features: ['scores', 'player-stats', 'advanced-metrics'],
+    features: ['live-scores', 'schedules', 'team-stats', 'standings'],
     reliability: 98
   },
   {
-    name: 'The Sports DB',
-    baseUrl: 'https://www.thesportsdb.com/api/v1/json',
+    name: 'OpenWeather API',
+    baseUrl: 'https://api.openweathermap.org/data/2.5',
     rateLimit: 100,
-    features: ['team-info', 'historical-data'],
-    reliability: 85
+    features: ['weather-conditions', 'stadium-weather'],
+    reliability: 95
   },
   {
-    name: 'Sports Reference',
-    baseUrl: 'https://www.pro-football-reference.com/years/2025',
-    rateLimit: 20,
-    features: ['advanced-stats', 'historical-trends'],
-    reliability: 90
+    name: 'The Odds API',
+    baseUrl: 'https://api.the-odds-api.com/v4/sports/americanfootball_nfl',
+    rateLimit: 50,
+    features: ['betting-lines', 'spreads', 'moneylines'],
+    reliability: 92
+  },
+  {
+    name: 'NFL.com Official API',
+    baseUrl: 'https://api.nfl.com/v3/shield',
+    rateLimit: 80,
+    features: ['player-stats', 'injury-reports', 'advanced-metrics'],
+    reliability: 96
   }
 ]
 
-// Cache interface for managing API responses
-interface CacheEntry<T> {
-  data: T
-  timestamp: number
-  ttl: number // time to live in milliseconds
-}
-
-class DataCache {
-  private cache = new Map<string, CacheEntry<any>>()
-
-  set<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl
-    })
-  }
-
-  get<T>(key: string): T | null {
-    const entry = this.cache.get(key)
-    if (!entry) return null
-
-    if (Date.now() - entry.timestamp > entry.ttl) {
-      this.cache.delete(key)
-      return null
-    }
-
-    return entry.data
-  }
-
-  clear(): void {
-    this.cache.clear()
-  }
-
-  size(): number {
-    return this.cache.size
-  }
-}
-
-const apiCache = new DataCache()
-
-// Rate limiting utility
-class RateLimiter {
-  private requests = new Map<string, number[]>()
-
-  canMakeRequest(provider: string, limit: number): boolean {
-    const now = Date.now()
-    const window = 60 * 1000 // 1 minute window
-    
-    if (!this.requests.has(provider)) {
-      this.requests.set(provider, [])
-    }
-
-    const providerRequests = this.requests.get(provider)!
-    
-    // Remove old requests outside the window
-    const validRequests = providerRequests.filter(time => now - time < window)
-    this.requests.set(provider, validRequests)
-
-    return validRequests.length < limit
-  }
-
-  recordRequest(provider: string): void {
-    if (!this.requests.has(provider)) {
-      this.requests.set(provider, [])
-    }
-    this.requests.get(provider)!.push(Date.now())
-  }
-}
-
-const rateLimiter = new RateLimiter()
-
-// Mock API responses for demonstration (in production, these would be real API calls)
+// Real sports data API that integrates with live data sources
 export class SportsDataAPI {
   private static instance: SportsDataAPI
 
@@ -124,323 +52,46 @@ export class SportsDataAPI {
     return SportsDataAPI.instance
   }
 
-  // Fetch live scores and update games
+  // Fetch live scores from real APIs
   async fetchLiveScores(): Promise<NFLGame[]> {
-    const cacheKey = 'live-scores'
-    const cached = apiCache.get<NFLGame[]>(cacheKey)
-    if (cached) return cached
-
-    try {
-      // In production, this would make actual API calls
-      // For demo, we'll simulate real-time score updates
-      const currentWeek = this.getCurrentWeek()
-      const games = this.generateLiveGameData(currentWeek)
-      
-      apiCache.set(cacheKey, games, 30 * 1000) // Cache for 30 seconds
-      return games
-    } catch (error) {
-      console.error('Error fetching live scores:', error)
-      return []
-    }
+    return await realSportsAPI.fetchLiveScores()
   }
 
-  // Fetch current preseason schedule from NFL APIs
+  // Fetch current preseason schedule from official sources
   async fetchPreseasonSchedule(week: number): Promise<NFLGame[]> {
-    const cacheKey = `preseason-schedule-${week}`
-    const cached = apiCache.get<NFLGame[]>(cacheKey)
-    if (cached) return cached
-
-    try {
-      // This would be actual ESPN API calls in production
-      // For now, we'll provide the correct Week 3 preseason schedule based on 2024 actual data
-      const games = this.getCurrentPreseasonGames(week)
-      
-      apiCache.set(cacheKey, games, 60 * 60 * 1000) // Cache for 1 hour
-      return games
-    } catch (error) {
-      console.error(`Error fetching preseason schedule for week ${week}:`, error)
-      return []
-    }
+    return await realSportsAPI.fetchSchedule(week)
   }
 
-  // Fetch real-time team statistics
+  // Fetch real-time team statistics from multiple sources
   async fetchTeamStats(teamId: string): Promise<TeamStats | null> {
-    const cacheKey = `team-stats-${teamId}`
-    const cached = apiCache.get<TeamStats>(cacheKey)
-    if (cached) return cached
-
-    try {
-      // Simulate API call with enhanced realistic data
-      const stats = this.generateEnhancedTeamStats(teamId)
-      
-      apiCache.set(cacheKey, stats, 10 * 60 * 1000) // Cache for 10 minutes
-      return stats
-    } catch (error) {
-      console.error(`Error fetching stats for team ${teamId}:`, error)
-      return null
-    }
+    return await realSportsAPI.fetchTeamStats(teamId)
   }
 
-  // Fetch injury reports and player availability
+  // Fetch injury reports from official NFL sources
   async fetchInjuryReport(teamId: string): Promise<any[]> {
-    const cacheKey = `injury-report-${teamId}`
-    const cached = apiCache.get<any[]>(cacheKey)
-    if (cached) return cached
-
-    try {
-      // Simulate injury data
-      const injuries = this.generateInjuryReport(teamId)
-      
-      apiCache.set(cacheKey, injuries, 60 * 60 * 1000) // Cache for 1 hour
-      return injuries
-    } catch (error) {
-      console.error(`Error fetching injury report for ${teamId}:`, error)
-      return []
-    }
+    return await realSportsAPI.fetchInjuryReport(teamId)
   }
 
-  // Fetch weather conditions for outdoor games
+  // Fetch weather conditions from weather APIs
   async fetchWeatherData(gameId: string): Promise<any | null> {
-    const cacheKey = `weather-${gameId}`
-    const cached = apiCache.get<any>(cacheKey)
-    if (cached) return cached
-
-    try {
-      // Simulate weather API call
-      const weather = this.generateWeatherData()
-      
-      apiCache.set(cacheKey, weather, 15 * 60 * 1000) // Cache for 15 minutes
-      return weather
-    } catch (error) {
-      console.error(`Error fetching weather for game ${gameId}:`, error)
-      return null
-    }
+    return await realSportsAPI.fetchWeatherData(gameId)
   }
 
-  // Fetch betting odds and spreads
+  // Fetch betting odds from sportsbook APIs
   async fetchBettingOdds(gameId: string): Promise<any | null> {
-    const cacheKey = `odds-${gameId}`
-    const cached = apiCache.get<any>(cacheKey)
-    if (cached) return cached
-
-    try {
-      // Simulate betting odds API
-      const odds = this.generateBettingOdds()
-      
-      apiCache.set(cacheKey, odds, 5 * 60 * 1000) // Cache for 5 minutes
-      return odds
-    } catch (error) {
-      console.error(`Error fetching odds for game ${gameId}:`, error)
-      return null
-    }
+    return await realSportsAPI.fetchBettingOdds(gameId)
   }
 
-  // Get API health status
+  // Get comprehensive API health status
   getAPIStatus(): Record<string, any> {
-    return {
-      providers: API_PROVIDERS.map(provider => ({
-        name: provider.name,
-        status: rateLimiter.canMakeRequest(provider.name, provider.rateLimit) ? 'available' : 'rate-limited',
-        reliability: provider.reliability,
-        features: provider.features
-      })),
-      cache: {
-        size: apiCache.size(),
-        hitRate: this.calculateCacheHitRate()
-      },
-      lastUpdate: new Date().toISOString()
-    }
+    return realSportsAPI.getAPIStatus()
   }
 
   // Clear all cached data
   clearCache(): void {
-    apiCache.clear()
+    realSportsAPI.clearCache()
   }
 
-  // Private helper methods for generating realistic mock data
-  private getCurrentWeek(): number {
-    const seasonStart = new Date('2025-09-04')
-    const now = new Date()
-    
-    if (now < seasonStart) return 1
-    
-    const diffTime = now.getTime() - seasonStart.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    const week = Math.ceil(diffDays / 7)
-    
-    return Math.min(week, 18)
-  }
-
-  private generateLiveGameData(week: number): NFLGame[] {
-    // In production, this would check real-time ESPN/NFL APIs for live games
-    // Only return games that are actually happening right now
-    const games: NFLGame[] = []
-    
-    // Check if there are real games happening now
-    const now = new Date()
-    const currentHour = now.getHours()
-    const currentDay = now.getDay() // 0 = Sunday, 1 = Monday, etc.
-    
-    // NFL games typically happen:
-    // Thursday: 8:15 PM ET (preseason/regular season)
-    // Friday: 8:00 PM ET (preseason only) 
-    // Saturday: Various times (preseason)
-    // Sunday: 1:00 PM, 4:05/4:25 PM, 8:20 PM ET
-    // Monday: 8:15 PM ET
-    
-    // For now, only show live games if it's actually game time
-    // This will be populated by real API calls in production
-    const isGameTime = (
-      (currentDay === 4 && currentHour >= 20) || // Thursday 8+ PM
-      (currentDay === 5 && currentHour >= 20) || // Friday 8+ PM (preseason)
-      (currentDay === 6 && currentHour >= 13) || // Saturday 1+ PM (preseason)
-      (currentDay === 0 && (currentHour >= 13 && currentHour <= 23)) || // Sunday 1 PM - 11 PM
-      (currentDay === 1 && currentHour >= 20) // Monday 8+ PM
-    )
-    
-    // Only return live games during actual game times
-    // Real implementation would query ESPN API for live scores
-    if (isGameTime) {
-      // This would be replaced with actual API calls:
-      // const liveGames = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard')
-      // return liveGames that are currently in progress
-      console.log('Game time detected - would fetch live scores from API')
-    }
-    
-    return games // Empty array unless real games are live
-  }
-
-  private getCurrentPreseasonGames(week: number): NFLGame[] {
-    // Return actual 2024 NFL Preseason Week 3 games that are happening tonight
-    // This data comes from ESPN API and NFL.com official schedules
-    const preseasonWeek3Games = [
-      { away: 'ari', home: 'den', time: 'Sun 9:00 PM ET' },
-      { away: 'bal', home: 'gb', time: 'Sat 1:00 PM ET' },
-      { away: 'cin', home: 'ind', time: 'Thu 8:00 PM ET' },
-      { away: 'cle', home: 'sea', time: 'Sat 10:00 PM ET' },
-      { away: 'dal', home: 'lac', time: 'Sat 10:00 PM ET' },
-      { away: 'lv', home: 'sf', time: 'Fri 10:30 PM ET' },
-      { away: 'mia', home: 'min', time: 'Sat 1:00 PM ET' },
-      { away: 'ne', home: 'wsh', time: 'Sun 8:00 PM ET' },
-      { away: 'nyg', home: 'nyj', time: 'Sat 7:30 PM ET' },
-      { away: 'no', home: 'ten', time: 'Sun 2:00 PM ET' },
-      { away: 'phi', home: 'car', time: 'Thu 8:00 PM ET' },
-      { away: 'pit', home: 'det', time: 'Sat 1:00 PM ET' },
-      { away: 'tb', home: 'mia', time: 'Fri 7:30 PM ET' },
-      { away: 'hou', home: 'lar', time: 'Sat 10:00 PM ET' },
-      { away: 'jax', home: 'atl', time: 'Fri 7:00 PM ET' },
-      { away: 'buf', home: 'chi', time: 'Sat 1:00 PM ET' }
-    ]
-
-    const games: NFLGame[] = []
-
-    if (week === -1) { // Preseason Week 3
-      console.log(`Loading ${preseasonWeek3Games.length} preseason Week 3 games from API data`)
-      
-      preseasonWeek3Games.forEach((gameData, index) => {
-        try {
-          const homeTeam = NFL_TEAMS.find(t => t.id === gameData.home)
-          const awayTeam = NFL_TEAMS.find(t => t.id === gameData.away)
-          
-          if (homeTeam && awayTeam) {
-            games.push({
-              id: `ps3g${gameData.away}${gameData.home}`,
-              week: -1,
-              homeTeam,
-              awayTeam,
-              gameTime: gameData.time,
-              isCompleted: false,
-              isPreseason: true
-            })
-          }
-        } catch (error) {
-          console.error(`Error creating preseason game: ${gameData.away} @ ${gameData.home}`, error)
-        }
-      })
-      
-      console.log(`Successfully loaded ${games.length} preseason Week 3 games`)
-    }
-
-    return games
-  }
-
-  private generateEnhancedTeamStats(teamId: string): TeamStats {
-    // Generate more realistic stats based on team historical performance
-    const teamPerformanceMap: Record<string, number> = {
-      'kc': 0.9, 'buf': 0.85, 'sf': 0.8, 'phi': 0.8, 'cin': 0.75,
-      'dal': 0.7, 'mia': 0.65, 'bal': 0.75, 'min': 0.7, 'det': 0.65,
-      'pit': 0.7, 'gb': 0.65, 'ten': 0.4, 'car': 0.3, 'hou': 0.6
-    }
-
-    const performance = teamPerformanceMap[teamId] || 0.5
-    const variance = 0.15
-
-    const basePoints = 20 + (performance * 12)
-    const baseYards = 300 + (performance * 100)
-
-    return {
-      pointsPerGame: Math.round((basePoints + (Math.random() - 0.5) * variance * 20) * 10) / 10,
-      pointsAllowed: Math.round(((32 - basePoints) + (Math.random() - 0.5) * variance * 20) * 10) / 10,
-      totalYards: Math.round(baseYards + (Math.random() - 0.5) * variance * 100),
-      yardsAllowed: Math.round((420 - baseYards) + (Math.random() - 0.5) * variance * 100),
-      turnoverDiff: Math.round((performance - 0.5) * 20 + (Math.random() - 0.5) * 10),
-      strengthOfSchedule: Math.round((0.4 + Math.random() * 0.2) * 100) / 100
-    }
-  }
-
-  private generateInjuryReport(teamId: string): any[] {
-    const positions = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K']
-    const statuses = ['Out', 'Doubtful', 'Questionable', 'Probable']
-    const injuries = ['Knee', 'Ankle', 'Shoulder', 'Hamstring', 'Concussion', 'Back']
-
-    const numInjuries = Math.floor(Math.random() * 5) + 1
-    const injuryReport = []
-
-    for (let i = 0; i < numInjuries; i++) {
-      injuryReport.push({
-        player: `Player ${i + 1}`,
-        position: positions[Math.floor(Math.random() * positions.length)],
-        injury: injuries[Math.floor(Math.random() * injuries.length)],
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        lastUpdate: new Date().toISOString()
-      })
-    }
-
-    return injuryReport
-  }
-
-  private generateWeatherData(): any {
-    const conditions = ['Clear', 'Cloudy', 'Light Rain', 'Heavy Rain', 'Snow', 'Windy']
-    const temp = 32 + Math.floor(Math.random() * 50) // 32-82°F
-    const windSpeed = Math.floor(Math.random() * 25) // 0-25 mph
-    
-    return {
-      condition: conditions[Math.floor(Math.random() * conditions.length)],
-      temperature: temp,
-      windSpeed,
-      windDirection: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.floor(Math.random() * 8)],
-      humidity: Math.floor(Math.random() * 100),
-      lastUpdate: new Date().toISOString()
-    }
-  }
-
-  private generateBettingOdds(): any {
-    const spread = (Math.random() - 0.5) * 14 // -7 to +7 point spread
-    const total = 42 + Math.random() * 20 // 42-62 total points
-    
-    return {
-      spread: Math.round(spread * 2) / 2, // Round to nearest half point
-      total: Math.round(total * 2) / 2,
-      moneylineHome: spread > 0 ? -Math.floor(100 + spread * 20) : Math.floor(100 - spread * 20),
-      moneylineAway: spread < 0 ? -Math.floor(100 - spread * 20) : Math.floor(100 + spread * 20),
-      lastUpdate: new Date().toISOString()
-    }
-  }
-
-  private calculateCacheHitRate(): number {
-    // This would track actual cache hits/misses in production
-    return Math.round(Math.random() * 30 + 70) // Simulate 70-100% hit rate
-  }
 }
 
 // Export the singleton instance

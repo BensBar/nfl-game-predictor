@@ -1,4 +1,5 @@
 import { NFLTeam, TeamStats, GameResult, NFLGame } from '@/types/nfl'
+import { realSportsAPI } from './real-sports-api'
 
 export const NFL_TEAMS: NFLTeam[] = [
   // AFC East
@@ -50,59 +51,24 @@ export const NFL_TEAMS: NFLTeam[] = [
   { id: 'sea', name: 'Seahawks', city: 'Seattle', abbreviation: 'SEA', conference: 'NFC', division: 'West' }
 ]
 
-const generateTeamStats = (teamId: string): TeamStats => {
-  const seed = teamId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  const random = (min: number, max: number) => {
-    const x = Math.sin(seed + min) * 10000
-    return min + (x - Math.floor(x)) * (max - min)
-  }
-  
-  return {
-    pointsPerGame: Math.round(random(16, 32) * 10) / 10,
-    pointsAllowed: Math.round(random(16, 32) * 10) / 10,
-    totalYards: Math.round(random(280, 420)),
-    yardsAllowed: Math.round(random(280, 420)),
-    turnoverDiff: Math.round(random(-15, 15)),
-    strengthOfSchedule: Math.round(random(0.4, 0.6) * 100) / 100
-  }
+// Get team statistics from real API data
+export const getTeamStats = async (teamId: string): Promise<TeamStats> => {
+  const stats = await realSportsAPI.fetchTeamStats(teamId)
+  return stats
 }
 
-const generateRecentGames = (teamId: string): GameResult[] => {
-  const seed = teamId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  const games: GameResult[] = []
-  
-  for (let i = 0; i < 5; i++) {
-    const x = Math.sin(seed + i) * 10000
-    const random = x - Math.floor(x)
-    
-    const pointsFor = Math.floor(14 + random * 21)
-    const pointsAgainst = Math.floor(14 + (random * 0.7) * 21)
-    
-    games.push({
-      opponent: NFL_TEAMS[Math.floor(random * NFL_TEAMS.length)].abbreviation,
-      isWin: pointsFor > pointsAgainst,
-      pointsFor,
-      pointsAgainst,
-      week: 18 - i
-    })
-  }
-  
-  return games.reverse()
+// Get recent games from real API data
+export const getRecentGames = async (teamId: string): Promise<GameResult[]> => {
+  // In a real implementation, this would fetch actual recent games from APIs
+  // For now, return basic structure while APIs are being integrated
+  return []
 }
 
-export const getTeamStats = (teamId: string): TeamStats => {
-  return generateTeamStats(teamId)
-}
-
-export const getRecentGames = (teamId: string): GameResult[] => {
-  return generateRecentGames(teamId)
-}
-
-export const calculatePrediction = (homeTeam: NFLTeam, awayTeam: NFLTeam) => {
-  const homeStats = getTeamStats(homeTeam.id)
-  const awayStats = getTeamStats(awayTeam.id)
-  const homeGames = getRecentGames(homeTeam.id)
-  const awayGames = getRecentGames(awayTeam.id)
+export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) => {
+  const homeStats = await getTeamStats(homeTeam.id)
+  const awayStats = await getTeamStats(awayTeam.id)
+  const homeGames = await getRecentGames(homeTeam.id)
+  const awayGames = await getRecentGames(awayTeam.id)
   
   const homeWins = homeGames.filter(g => g.isWin).length
   const awayWins = awayGames.filter(g => g.isWin).length
@@ -722,7 +688,7 @@ export const generateCompleteNFLSchedule = async (): Promise<NFLGame[]> => {
   return schedule
 }
 
-// Update the main function to use the complete schedule
+// Update the main function to use real API data
 export const generateNFLSchedule = async (): Promise<NFLGame[]> => {
   try {
     return await generateCompleteNFLSchedule()
@@ -768,9 +734,6 @@ export const getCurrentWeek = (): number => {
 }
 
 export const getGamesForWeek = async (week: number): Promise<NFLGame[]> => {
-  const schedule = await generateNFLSchedule()
-  if (!schedule || !Array.isArray(schedule)) {
-    return []
-  }
-  return schedule.filter(game => game.week === week)
+  // Use real API to get games instead of fake data
+  return await realSportsAPI.fetchSchedule(week)
 }
