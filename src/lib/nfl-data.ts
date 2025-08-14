@@ -273,48 +273,7 @@ export const generateCompleteNFLSchedule = async (): Promise<NFLGame[]> => {
   const schedule: NFLGame[] = []
 
   try {
-    // Add preseason week 3 games (Week -1) - August 21-23, 2025
-  const preseasonWeek3Games = [
-    { away: 'pit', home: 'car', time: 'Thu 7:00 PM ET' },
-    { away: 'ne', home: 'nyg', time: 'Thu 8:00 PM ET' },
-    { away: 'phi', home: 'nyj', time: 'Fri 7:30 PM ET' },
-    { away: 'atl', home: 'dal', time: 'Fri 8:00 PM ET' },
-    { away: 'min', home: 'ten', time: 'Fri 8:00 PM ET' },
-    { away: 'chi', home: 'kc', time: 'Fri 8:20 PM ET' },
-    { away: 'bal', home: 'wsh', time: 'Sat 12:00 PM ET' },
-    { away: 'ind', home: 'cin', time: 'Sat 1:00 PM ET' },
-    { away: 'lar', home: 'cle', time: 'Sat 1:00 PM ET' },
-    { away: 'hou', home: 'det', time: 'Sat 1:00 PM ET' },
-    { away: 'den', home: 'no', time: 'Sat 1:00 PM ET' },
-    { away: 'sea', home: 'gb', time: 'Sat 4:00 PM ET' },
-    { away: 'jax', home: 'mia', time: 'Sat 7:00 PM ET' },
-    { away: 'buf', home: 'tb', time: 'Sat 7:30 PM ET' },
-    { away: 'lac', home: 'sf', time: 'Sat 8:30 PM ET' },
-    { away: 'lv', home: 'ari', time: 'Sat 10:00 PM ET' }
-  ]
-
-  // Add preseason week 3 to schedule
-  preseasonWeek3Games.forEach((gameData) => {
-    try {
-      const gameId = `ps3g${gameData.away}${gameData.home}`
-      const homeTeam = getTeam(gameData.home)
-      const awayTeam = getTeam(gameData.away)
-      
-      schedule.push({
-        id: gameId,
-        week: -1,
-        homeTeam,
-        awayTeam,
-        gameTime: gameData.time,
-        isCompleted: false,
-        isPreseason: true
-      })
-    } catch (error) {
-      console.error(`Error creating preseason week 3 game: ${gameData.away} @ ${gameData.home}`, error)
-    }
-  })
-
-  // 2025 Preseason Schedule - Updated with correct data
+    // 2025 Preseason Schedule - Fixed correct week ordering
     const preseasonGames = [
       // Preseason Week 1 (Week -3) - August 7-10, 2025
       [
@@ -353,12 +312,31 @@ export const generateCompleteNFLSchedule = async (): Promise<NFLGame[]> => {
         { away: 'jax', home: 'no', time: 'Sun 1:00 PM ET' },
         { away: 'buf', home: 'chi', time: 'Sun 8:00 PM ET' },
         { away: 'cin', home: 'wsh', time: 'Mon 8:00 PM ET' }
+      ],
+      // Preseason Week 3 (Week -1) - August 21-23, 2025
+      [
+        { away: 'pit', home: 'car', time: 'Thu 7:00 PM ET' },
+        { away: 'ne', home: 'nyg', time: 'Thu 8:00 PM ET' },
+        { away: 'phi', home: 'nyj', time: 'Fri 7:30 PM ET' },
+        { away: 'atl', home: 'dal', time: 'Fri 8:00 PM ET' },
+        { away: 'min', home: 'ten', time: 'Fri 8:00 PM ET' },
+        { away: 'chi', home: 'kc', time: 'Fri 8:20 PM ET' },
+        { away: 'bal', home: 'wsh', time: 'Sat 12:00 PM ET' },
+        { away: 'ind', home: 'cin', time: 'Sat 1:00 PM ET' },
+        { away: 'lar', home: 'cle', time: 'Sat 1:00 PM ET' },
+        { away: 'hou', home: 'det', time: 'Sat 1:00 PM ET' },
+        { away: 'den', home: 'no', time: 'Sat 1:00 PM ET' },
+        { away: 'sea', home: 'gb', time: 'Sat 4:00 PM ET' },
+        { away: 'jax', home: 'mia', time: 'Sat 7:00 PM ET' },
+        { away: 'buf', home: 'tb', time: 'Sat 7:30 PM ET' },
+        { away: 'lac', home: 'sf', time: 'Sat 8:30 PM ET' },
+        { away: 'lv', home: 'ari', time: 'Sat 10:00 PM ET' }
       ]
     ]
     
-    // Add remaining preseason weeks (Week -3, -2)
+    // Add preseason weeks (Week -3, -2, -1)
     preseasonGames.forEach((weekGames, weekIndex) => {
-      const week = -3 + weekIndex // -3, -2
+      const week = -3 + weekIndex // -3, -2, -1
       
       weekGames.forEach((gameData) => {
         try {
@@ -755,8 +733,8 @@ export const generateNFLSchedule = async (): Promise<NFLGame[]> => {
 }
 
 export const getCurrentWeek = (): number => {
-  // Return preseason week 3 (-1) for testing with tonight's games
-  return -1
+  // Return preseason week 2 (-2) for testing with tonight's games
+  return -2
   
   // For production, use the actual date calculation:
   /*
