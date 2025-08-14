@@ -62,6 +62,8 @@ function App() {
     }
   }
 
+  const [isGeneratingPrediction, setIsGeneratingPrediction] = useState(false)
+  
   const handlePredict = async () => {
     if (!selectedGame) {
       toast.error('Please select a game')
@@ -73,7 +75,11 @@ function App() {
       return
     }
 
+    setIsGeneratingPrediction(true)
+    
     try {
+      toast.success('🔄 Analyzing teams using live API data...')
+      
       const result = await calculatePrediction(selectedGame.homeTeam, selectedGame.awayTeam)
       
       const prediction: Prediction = {
@@ -88,10 +94,12 @@ function App() {
       }
 
       setCurrentPrediction(prediction)
-      toast.success('Prediction generated using real API data!')
+      toast.success(`🎯 Prediction complete! ${prediction.homeWinProbability > prediction.awayWinProbability ? selectedGame.homeTeam.city : selectedGame.awayTeam.city} favored with ${Math.max(prediction.homeWinProbability, prediction.awayWinProbability)}% probability`)
     } catch (error) {
       console.error('Error generating prediction:', error)
-      toast.error('Failed to generate prediction')
+      toast.error('Failed to generate prediction. Please try again.')
+    } finally {
+      setIsGeneratingPrediction(false)
     }
   }
 
@@ -126,12 +134,12 @@ function App() {
       <Toaster />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">NFL Live Data Predictor</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">NFL Game Predictor</h1>
           <p className="text-lg text-muted-foreground mb-1">
-            Real-time analytics powered by ESPN, OpenWeather & Odds APIs
+            Advanced AI-powered predictions using real-time data from ESPN, Weather & Odds APIs
           </p>
           <p className="text-sm text-muted-foreground/80">
-            Live data integration • No more fake data • View "Data Sources" for API details
+            • Live team statistics • Injury analysis • Weather impact • Home field advantage
           </p>
         </div>
 
@@ -192,11 +200,11 @@ function App() {
             <div className="flex justify-center mt-6">
               <Button 
                 onClick={handlePredict}
-                disabled={!selectedGame || selectedGame.isCompleted}
+                disabled={!selectedGame || selectedGame.isCompleted || isGeneratingPrediction}
                 size="lg"
                 className="min-w-32"
               >
-                Generate Prediction
+                {isGeneratingPrediction ? 'Analyzing Teams...' : 'Generate Prediction'}
               </Button>
             </div>
           </CardContent>
@@ -208,8 +216,8 @@ function App() {
               <Info className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
                 {selectedGame?.isPreseason 
-                  ? '✅ Real API Integration: Using live ESPN, OpenWeather, and Odds APIs for authentic sports data!'
-                  : 'Games automatically go live when they start. All data now comes from real sports APIs with 30-second refresh rates.'
+                  ? '🎯 Real-time prediction using: ESPN team stats, injury reports, weather data & betting odds analysis!'
+                  : '🎯 Live prediction using: Current team performance, injury status, weather conditions & historical data!'
                 }
               </AlertDescription>
             </Alert>

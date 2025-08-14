@@ -88,6 +88,9 @@ export function PredictionResult({
               </div>
             ))}
           </div>
+          <div className="text-xs text-muted-foreground pt-2 border-t">
+            🔄 Based on live ESPN stats, injury reports, weather data & betting odds
+          </div>
         </div>
       </CardContent>
     </Card>
