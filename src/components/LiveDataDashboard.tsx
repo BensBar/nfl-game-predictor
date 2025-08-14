@@ -5,41 +5,38 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useLiveScores, useAPIStatus } from '@/hooks/useSportsData'
 import { NFLGame } from '@/types/nfl'
+import { LiveGamesGrid } from './LiveGamesGrid'
+import { PredictionService } from '@/lib/prediction-service'
 import { 
   Activity, 
-  Wifi, 
-  WifiOff, 
-  RefreshCw, 
+  WifiHigh, 
+  WifiX, 
+  ArrowClockwise, 
   Clock, 
-  AlertTriangle,
+  Warning,
   CheckCircle,
   Database,
   Zap,
-  TrendingUp,
+  TrendUp,
   Target,
   Calendar,
-  ExternalLink
+  Link
 } from '@phosphor-icons/react'
 
 interface LiveDataDashboardProps {
   currentWeekGames: NFLGame[]
-  selectedGame: NFLGame | null
-  onGameSelect: (game: NFLGame) => void
-  onPredict: () => Promise<void>
-  isGeneratingPrediction: boolean
   currentWeek: number
+  onForceRefresh?: () => Promise<void>
+  isRefreshing?: boolean
 }
 
 export function LiveDataDashboard({ 
   currentWeekGames, 
-  selectedGame, 
-  onGameSelect, 
-  onPredict, 
-  isGeneratingPrediction, 
-  currentWeek 
+  currentWeek,
+  onForceRefresh,
+  isRefreshing
 }: LiveDataDashboardProps) {
   const [autoRefresh, setAutoRefresh] = useState(true)
   const { liveScores, loading, error, lastUpdate, refresh } = useLiveScores(autoRefresh ? 30000 : 0)
@@ -56,9 +53,9 @@ export function LiveDataDashboard({
       case 'available':
         return <CheckCircle className="text-green-600" size={16} />
       case 'rate-limited':
-        return <AlertTriangle className="text-yellow-600" size={16} />
+        return <Warning className="text-yellow-600" size={16} />
       default:
-        return <WifiOff className="text-red-600" size={16} />
+        return <WifiX className="text-red-600" size={16} />
     }
   }
 
@@ -83,7 +80,7 @@ export function LiveDataDashboard({
             onClick={() => setAutoRefresh(!autoRefresh)}
             className="flex items-center gap-2"
           >
-            {autoRefresh ? <Wifi size={16} /> : <WifiOff size={16} />}
+            {autoRefresh ? <WifiHigh size={16} /> : <WifiX size={16} />}
             {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
           </Button>
           
@@ -94,7 +91,7 @@ export function LiveDataDashboard({
             disabled={loading}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={loading ? 'animate-spin' : ''} size={16} />
+            <ArrowClockwise className={loading ? 'animate-spin' : ''} size={16} />
             Refresh
           </Button>
           
@@ -123,7 +120,7 @@ export function LiveDataDashboard({
 
       {error && (
         <Alert className="border-red-200 bg-red-50/50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <Warning className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
             {error}
           </AlertDescription>
@@ -137,11 +134,11 @@ export function LiveDataDashboard({
             Current Week
           </TabsTrigger>
           <TabsTrigger value="live-scores" className="flex items-center gap-2">
-            <TrendingUp size={16} />
+            <TrendUp size={16} />
             Live Scores
           </TabsTrigger>
           <TabsTrigger value="api-status" className="flex items-center gap-2">
-            <Wifi size={16} />
+            <WifiHigh size={16} />
             API Status
           </TabsTrigger>
           <TabsTrigger value="data-sources" className="flex items-center gap-2">
@@ -155,160 +152,12 @@ export function LiveDataDashboard({
         </TabsList>
 
         <TabsContent value="current-week" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="text-primary" />
-                {currentWeek < 0 
-                  ? `Preseason Week ${Math.abs(currentWeek)} - Game Selection & Prediction` 
-                  : `Week ${currentWeek} - Game Selection & Prediction`
-                }
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Game Selection */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Select Game to Predict</label>
-                  <Select 
-                    value={selectedGame?.id || ''} 
-                    onValueChange={(gameId) => {
-                      const game = currentWeekGames.find(g => g.id === gameId)
-                      if (game) onGameSelect(game)
-                    }}
-                    disabled={(currentWeekGames?.length || 0) === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a game from this week" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(currentWeekGames || []).map((game) => {
-                        // Validate game data before rendering
-                        if (!game?.homeTeam?.city || !game?.awayTeam?.city) {
-                          console.warn('Skipping game with invalid team data:', game)
-                          return null
-                        }
-                        
-                        return (
-                          <SelectItem key={game.id} value={game.id}>
-                            {game.awayTeam.city} @ {game.homeTeam.city} ({game.gameTime})
-                            {game.isCompleted && ' - Completed'}
-                            {game.isPreseason && ' - Preseason'}
-                          </SelectItem>
-                        )
-                      }).filter(Boolean)}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Prediction Button */}
-                <div className="flex justify-center">
-                  <Button 
-                    onClick={onPredict}
-                    disabled={!selectedGame || selectedGame?.isCompleted || isGeneratingPrediction}
-                    size="lg"
-                    className="min-w-48"
-                  >
-                    {isGeneratingPrediction ? (
-                      <>
-                        <RefreshCw className="animate-spin mr-2" size={16} />
-                        Analyzing with Live Data...
-                      </>
-                    ) : (
-                      <>
-                        <Target className="mr-2" size={16} />
-                        Generate AI Prediction
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Status Messages */}
-              <div className="space-y-2">
-                {currentWeekGames && currentWeekGames.length === 0 && (
-                  <Alert className="border-yellow-200 bg-yellow-50/50">
-                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                    <AlertDescription className="text-yellow-800">
-                      <strong>No games found</strong> for {currentWeek < 0 ? `Preseason Week ${Math.abs(currentWeek)}` : `Week ${currentWeek}`}. 
-                      Check back during game week or verify the current week setting.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                {currentWeekGames && currentWeekGames.length > 0 && !selectedGame && (
-                  <Alert className="border-blue-200 bg-blue-50/50">
-                    <CheckCircle className="h-4 w-4 text-blue-600" />
-                    <AlertDescription className="text-blue-800">
-                      <strong>Ready:</strong> {currentWeekGames.length} games available for {currentWeek < 0 ? `Preseason Week ${Math.abs(currentWeek)}` : `Week ${currentWeek}`}. 
-                      Select one above to generate real-time predictions.
-                    </AlertDescription>
-                  </Alert>
-                )}
-                
-                {selectedGame && selectedGame.homeTeam?.city && selectedGame.awayTeam?.city && (
-                  <Alert className="border-green-200 bg-green-50/50">
-                    <Target className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800">
-                      <strong>Selected:</strong> {selectedGame.awayTeam.city} @ {selectedGame.homeTeam.city} ({selectedGame.gameTime})
-                      {selectedGame.isPreseason && ' - Preseason Game'}
-                      <br />
-                      <span className="text-xs">Ready to analyze with live team stats, injury reports, weather data & betting odds!</span>
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-
-              {/* Current Week Games List */}
-              {currentWeekGames && currentWeekGames.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-medium text-sm">All Games This Week:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {currentWeekGames.map((game) => (
-                      <Card 
-                        key={game.id} 
-                        className={`cursor-pointer transition-all hover:shadow-md ${
-                          selectedGame?.id === game.id ? 'ring-2 ring-primary' : ''
-                        }`}
-                        onClick={() => onGameSelect(game)}
-                      >
-                        <CardContent className="py-3">
-                          <div className="flex justify-between items-center">
-                            <div className="space-y-1">
-                              <div className="font-medium text-sm">
-                                {game.awayTeam.city} @ {game.homeTeam.city}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {game.gameTime}
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-1">
-                              {game.isLive && (
-                                <Badge variant="outline" className="text-green-600 border-green-600 text-xs">
-                                  <Activity size={10} className="mr-1" />
-                                  LIVE
-                                </Badge>
-                              )}
-                              {game.isCompleted && (
-                                <Badge variant="outline" className="text-gray-600 border-gray-600 text-xs">
-                                  FINAL
-                                </Badge>
-                              )}
-                              {game.isPreseason && (
-                                <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs">
-                                  PRESEASON
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <LiveGamesGrid 
+            games={currentWeekGames || []}
+            currentWeek={currentWeek}
+            onForceRefresh={onForceRefresh}
+            isRefreshing={isRefreshing}
+          />
         </TabsContent>
 
         <TabsContent value="live-scores" className="space-y-4">
@@ -322,7 +171,7 @@ export function LiveDataDashboard({
             <CardContent>
               {loading && liveScores.length === 0 ? (
                 <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="animate-spin mr-2" size={20} />
+                  <ArrowClockwise className="animate-spin mr-2" size={20} />
                   Loading live scores...
                 </div>
               ) : liveScores.length > 0 ? (
@@ -403,19 +252,19 @@ export function LiveDataDashboard({
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>ESPN Sports API - Live scores, team rankings</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>NFL.com Official - Player stats, game results</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>CBS Sports - Injury reports, depth charts</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                   </div>
@@ -423,26 +272,26 @@ export function LiveDataDashboard({
                 
                 <div className="space-y-3">
                   <h4 className="font-medium flex items-center gap-2">
-                    <TrendingUp size={16} className="text-green-600" />
+                    <TrendUp size={16} className="text-green-600" />
                     Analytics Providers
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>Pro Football Reference - Historical stats</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>Football Outsiders - Advanced metrics</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>PFF - Player grades & analytics</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                   </div>
@@ -457,19 +306,19 @@ export function LiveDataDashboard({
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>OpenWeather API - Game day conditions</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>NOAA Weather - Temperature, wind</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>Stadium Data - Surface, dome status</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                   </div>
@@ -484,19 +333,19 @@ export function LiveDataDashboard({
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>DraftKings - Point spreads, totals</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>FanDuel - Market consensus</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>The Odds API - Line movement tracking</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                   </div>
