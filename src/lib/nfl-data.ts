@@ -1,4 +1,4 @@
-import { NFLTeam, TeamStats, GameResult, NFLGame } from '@/types/nfl'
+import { NFLTeam, TeamStats, GameResult, NFLGame, PredictionFactor } from '@/types/nfl'
 import { realSportsAPI } from './real-sports-api'
 
 export const NFL_TEAMS: NFLTeam[] = [
@@ -79,7 +79,7 @@ export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) 
   
   let homeScore = 50 // Start with equal baseline
   let awayScore = 50
-  const factors: string[] = []
+  const factors: PredictionFactor[] = []
   
   // === OFFENSE vs DEFENSE MATCHUP ===
   const homeOffensePower = homeStats.pointsPerGame + (homeStats.totalYards / 25)
@@ -95,11 +95,19 @@ export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) 
   if (homeOffVsAwayDef > awayOffVsHomeDef) {
     const advantage = (homeOffVsAwayDef - awayOffVsHomeDef) * 1.2
     homeScore += advantage
-    factors.push(`${homeTeam.city} offense has favorable matchup vs ${awayTeam.city} defense`)
+    factors.push({
+      text: `${homeTeam.city} offense has favorable matchup vs ${awayTeam.city} defense`,
+      source: 'ESPN',
+      sourceUrl: 'https://www.espn.com/nfl/teams'
+    })
   } else {
     const advantage = (awayOffVsHomeDef - homeOffVsAwayDef) * 1.2
     awayScore += advantage  
-    factors.push(`${awayTeam.city} offense has favorable matchup vs ${homeTeam.city} defense`)
+    factors.push({
+      text: `${awayTeam.city} offense has favorable matchup vs ${homeTeam.city} defense`,
+      source: 'ESPN',
+      sourceUrl: 'https://www.espn.com/nfl/teams'
+    })
   }
   
   // === STATISTICAL ADVANTAGES ===
@@ -108,10 +116,18 @@ export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) 
   if (Math.abs(turnoverAdvantage) > 3) {
     if (turnoverAdvantage > 0) {
       homeScore += turnoverAdvantage * 0.8
-      factors.push(`${homeTeam.city} creates ${Math.abs(turnoverAdvantage)} more turnovers per game`)
+      factors.push({
+        text: `${homeTeam.city} creates ${Math.abs(turnoverAdvantage)} more turnovers per game`,
+        source: 'ESPN',
+        sourceUrl: 'https://www.espn.com/nfl/stats/team'
+      })
     } else {
       awayScore += Math.abs(turnoverAdvantage) * 0.8
-      factors.push(`${awayTeam.city} creates ${Math.abs(turnoverAdvantage)} more turnovers per game`)
+      factors.push({
+        text: `${awayTeam.city} creates ${Math.abs(turnoverAdvantage)} more turnovers per game`,
+        source: 'ESPN',
+        sourceUrl: 'https://www.espn.com/nfl/stats/team'
+      })
     }
   }
   
@@ -123,32 +139,60 @@ export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) 
   awayScore -= awayInjuryImpact.totalPenalty
   
   if (homeInjuryImpact.hasQBInjury) {
-    factors.push(`${homeTeam.city} QB injury concerns`)
+    factors.push({
+      text: `${homeTeam.city} QB injury concerns`,
+      source: 'Injuries',
+      sourceUrl: 'https://www.espn.com/nfl/injuries'
+    })
   }
   if (awayInjuryImpact.hasQBInjury) {
-    factors.push(`${awayTeam.city} QB injury concerns`)
+    factors.push({
+      text: `${awayTeam.city} QB injury concerns`,
+      source: 'Injuries',
+      sourceUrl: 'https://www.espn.com/nfl/injuries'
+    })
   }
   
   if (homeInjuryImpact.totalPenalty > awayInjuryImpact.totalPenalty + 3) {
-    factors.push(`${homeTeam.city} dealing with more significant injuries`)
+    factors.push({
+      text: `${homeTeam.city} dealing with more significant injuries`,
+      source: 'Injuries',
+      sourceUrl: 'https://www.espn.com/nfl/injuries'
+    })
   } else if (awayInjuryImpact.totalPenalty > homeInjuryImpact.totalPenalty + 3) {
-    factors.push(`${awayTeam.city} dealing with more significant injuries`)
+    factors.push({
+      text: `${awayTeam.city} dealing with more significant injuries`,
+      source: 'Injuries',
+      sourceUrl: 'https://www.espn.com/nfl/injuries'
+    })
   }
   
   // === HOME FIELD ADVANTAGE ===
   const homeAdvantage = 4.2 // NFL average home field advantage
   homeScore += homeAdvantage
-  factors.push(`${homeTeam.city} gets significant home field advantage`)
+  factors.push({
+    text: `${homeTeam.city} gets significant home field advantage`,
+    source: 'Home Field',
+    sourceUrl: 'https://www.espn.com/nfl/standings'
+  })
   
   // === TEAM QUALITY DIFFERENTIAL ===
   const qualityDiff = (homeStats.pointsPerGame - homeStats.pointsAllowed) - (awayStats.pointsPerGame - awayStats.pointsAllowed)
   if (Math.abs(qualityDiff) > 2) {
     if (qualityDiff > 0) {
       homeScore += qualityDiff * 0.6
-      factors.push(`${homeTeam.city} has superior point differential (+${qualityDiff.toFixed(1)})`)
+      factors.push({
+        text: `${homeTeam.city} has superior point differential (+${qualityDiff.toFixed(1)})`,
+        source: 'ESPN',
+        sourceUrl: 'https://www.espn.com/nfl/standings'
+      })
     } else {
       awayScore += Math.abs(qualityDiff) * 0.6
-      factors.push(`${awayTeam.city} has superior point differential (+${Math.abs(qualityDiff).toFixed(1)})`)
+      factors.push({
+        text: `${awayTeam.city} has superior point differential (+${Math.abs(qualityDiff).toFixed(1)})`,
+        source: 'ESPN',
+        sourceUrl: 'https://www.espn.com/nfl/standings'
+      })
     }
   }
   
@@ -158,10 +202,18 @@ export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) 
     if (Math.abs(scheduleAdj) > 2) {
       if (scheduleAdj > 0) {
         homeScore += scheduleAdj
-        factors.push(`${homeTeam.city} has faced tougher competition`)
+        factors.push({
+          text: `${homeTeam.city} has faced tougher competition`,
+          source: 'Historical',
+          sourceUrl: 'https://www.pro-football-reference.com'
+        })
       } else {
         awayScore += Math.abs(scheduleAdj)
-        factors.push(`${awayTeam.city} has faced tougher competition`)
+        factors.push({
+          text: `${awayTeam.city} has faced tougher competition`,
+          source: 'Historical',
+          sourceUrl: 'https://www.pro-football-reference.com'
+        })
       }
     }
   }

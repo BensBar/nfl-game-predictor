@@ -24,6 +24,12 @@ export interface GameResult {
   week: number
 }
 
+export interface PredictionFactor {
+  text: string
+  source: 'ESPN' | 'Weather' | 'Injuries' | 'Betting' | 'Historical' | 'Home Field'
+  sourceUrl?: string
+}
+
 export interface Prediction {
   id: string
   homeTeam: NFLTeam
@@ -31,7 +37,7 @@ export interface Prediction {
   homeWinProbability: number
   awayWinProbability: number
   confidence: number
-  factors: string[]
+  factors: PredictionFactor[]
   timestamp: number
 }
 

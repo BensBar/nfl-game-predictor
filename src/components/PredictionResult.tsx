@@ -2,8 +2,9 @@ import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { NFLTeam } from '@/types/nfl'
-import { Trophy, Target } from '@phosphor-icons/react'
+import { Button } from '@/components/ui/button'
+import { NFLTeam, PredictionFactor } from '@/types/nfl'
+import { Trophy, Target, LinkSimple, Database, CloudRain, FirstAid, TrendingUp, House, ChartLine } from '@phosphor-icons/react'
 
 interface PredictionResultProps {
   homeTeam: NFLTeam
@@ -11,7 +12,7 @@ interface PredictionResultProps {
   homeWinProbability: number
   awayWinProbability: number
   confidence: number
-  factors: string[]
+  factors: PredictionFactor[]
 }
 
 export function PredictionResult({
@@ -24,6 +25,44 @@ export function PredictionResult({
 }: PredictionResultProps) {
   const favoredTeam = homeWinProbability > awayWinProbability ? homeTeam : awayTeam
   const favoredPercentage = Math.max(homeWinProbability, awayWinProbability)
+
+  const getSourceIcon = (source: string) => {
+    switch (source) {
+      case 'ESPN':
+        return <Database size={14} className="text-blue-600" />
+      case 'Weather':
+        return <CloudRain size={14} className="text-gray-600" />
+      case 'Injuries':
+        return <FirstAid size={14} className="text-red-600" />
+      case 'Betting':
+        return <ChartLine size={14} className="text-green-600" />
+      case 'Historical':
+        return <TrendingUp size={14} className="text-purple-600" />
+      case 'Home Field':
+        return <House size={14} className="text-orange-600" />
+      default:
+        return <Database size={14} className="text-gray-600" />
+    }
+  }
+
+  const getSourceUrl = (source: string) => {
+    switch (source) {
+      case 'ESPN':
+        return 'https://www.espn.com/nfl/teams'
+      case 'Weather':
+        return 'https://weather.com'
+      case 'Injuries':
+        return 'https://www.espn.com/nfl/injuries'
+      case 'Betting':
+        return 'https://www.espn.com/nfl/lines'
+      case 'Historical':
+        return 'https://www.pro-football-reference.com'
+      case 'Home Field':
+        return 'https://www.espn.com/nfl/standings'
+      default:
+        return '#'
+    }
+  }
 
   return (
     <Card className="border-primary/20">
@@ -75,21 +114,59 @@ export function PredictionResult({
 
         <div className="space-y-3">
           <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-            Key Factors
+            Key Factors & Sources
           </h4>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {factors.map((factor, index) => (
               <div 
                 key={index}
-                className="flex items-start gap-2 text-sm"
+                className="flex items-start gap-3 text-sm p-3 rounded-lg bg-muted/30 border border-muted"
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-accent mt-2 flex-shrink-0" />
-                <span>{factor}</span>
+                <div className="flex-1">
+                  <span className="text-foreground">{factor.text}</span>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-background rounded-md border">
+                    {getSourceIcon(factor.source)}
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {factor.source}
+                    </span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => window.open(factor.sourceUrl || getSourceUrl(factor.source), '_blank')}
+                    title={`View ${factor.source} source`}
+                  >
+                    <LinkSimple size={12} className="text-muted-foreground hover:text-primary" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
-          <div className="text-xs text-muted-foreground pt-2 border-t">
-            🔄 Based on live ESPN stats, injury reports, weather data & betting odds
+          <div className="text-xs text-muted-foreground pt-2 border-t flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <Database size={12} className="text-blue-600" />
+              <span>ESPN</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <CloudRain size={12} className="text-gray-600" />
+              <span>Weather</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <FirstAid size={12} className="text-red-600" />
+              <span>Injuries</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <ChartLine size={12} className="text-green-600" />
+              <span>Betting</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <House size={12} className="text-orange-600" />
+              <span>Home Field</span>
+            </div>
           </div>
         </div>
       </CardContent>
