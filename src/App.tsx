@@ -69,10 +69,8 @@ function App() {
     console.log('Week changing disabled - only current week predictions supported')
   }
 
-  const handleGameSelect = (gameId: string) => {
+  const handleGameSelect = (game: NFLGame) => {
     try {
-      const game = Array.isArray(weekGames) ? weekGames.find(g => g.id === gameId) : null
-      
       // Validate game data before setting
       if (game && game.homeTeam && game.awayTeam && 
           game.homeTeam.city && game.awayTeam.city) {
@@ -86,7 +84,7 @@ function App() {
         toast.error('Unable to select game - invalid team data')
       }
     } catch (error) {
-      console.error('Error selecting game:', gameId, error)
+      console.error('Error selecting game:', error)
       setSelectedGame(null)
       setCurrentPrediction(null)
       toast.error('Error selecting game')
@@ -218,7 +216,7 @@ function App() {
             <LiveDataDashboard 
               currentWeekGames={weekGames}
               selectedGame={selectedGame}
-              onGameSelect={setSelectedGame}
+              onGameSelect={handleGameSelect}
               onPredict={handlePredict}
               isGeneratingPrediction={isGeneratingPrediction}
               currentWeek={currentWeek}
@@ -365,40 +363,17 @@ function App() {
         )}
 
         {!currentPrediction && (
-          <div className="space-y-8">
-            {Array.isArray(weekGames) && weekGames.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {currentWeek < 0 
-                      ? `Preseason Week ${Math.abs(currentWeek)} Games` 
-                      : `Week ${currentWeek} Games`
-                    }
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <WeeklySchedule 
-                    week={currentWeek}
-                    games={Array.isArray(weekGames) ? weekGames : []}
-                    selectedGame={selectedGame}
-                    onGameSelect={handleGameSelect}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="text-center py-12">
-              <Calendar size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-xl font-semibold mb-2 text-muted-foreground">
-                Ready to Predict
-              </h3>
-              <p className="text-muted-foreground">
-                {selectedGame 
-                  ? 'Use the "Generate Prediction" button in the Live Data Dashboard above'
-                  : 'Select a game from the Live Data Dashboard to generate predictions'
-                }
-              </p>
-            </div>
+          <div className="text-center py-12">
+            <Calendar size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
+            <h3 className="text-xl font-semibold mb-2 text-muted-foreground">
+              Ready to Predict
+            </h3>
+            <p className="text-muted-foreground">
+              {selectedGame 
+                ? 'Use the "Generate Prediction" button in the Live Data Dashboard above'
+                : 'Select a game from the Live Data Dashboard to generate predictions'
+              }
+            </p>
           </div>
         )}
       </div>

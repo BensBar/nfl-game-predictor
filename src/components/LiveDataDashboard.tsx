@@ -27,7 +27,7 @@ import {
 interface LiveDataDashboardProps {
   currentWeekGames: NFLGame[]
   selectedGame: NFLGame | null
-  onGameSelect: (gameId: string) => void
+  onGameSelect: (game: NFLGame) => void
   onPredict: () => Promise<void>
   isGeneratingPrediction: boolean
   currentWeek: number
@@ -172,7 +172,10 @@ export function LiveDataDashboard({
                   <label className="text-sm font-medium">Select Game to Predict</label>
                   <Select 
                     value={selectedGame?.id || ''} 
-                    onValueChange={onGameSelect}
+                    onValueChange={(gameId) => {
+                      const game = currentWeekGames.find(g => g.id === gameId)
+                      if (game) onGameSelect(game)
+                    }}
                     disabled={(currentWeekGames?.length || 0) === 0}
                   >
                     <SelectTrigger>
@@ -267,7 +270,7 @@ export function LiveDataDashboard({
                         className={`cursor-pointer transition-all hover:shadow-md ${
                           selectedGame?.id === game.id ? 'ring-2 ring-primary' : ''
                         }`}
-                        onClick={() => onGameSelect(game.id)}
+                        onClick={() => onGameSelect(game)}
                       >
                         <CardContent className="py-3">
                           <div className="flex justify-between items-center">

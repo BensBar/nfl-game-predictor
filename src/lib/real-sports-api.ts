@@ -377,16 +377,21 @@ export class RealSportsAPI {
     return weekGames.map((gameData, index) => {
       try {
         const gameId = `ps${Math.abs(week)}g${index + 1}`
+        console.log(`🏈 Creating preseason game ${gameId}: ${gameData.away} @ ${gameData.home}`)
+        
         const homeTeam = this.getTeamById(gameData.home)
         const awayTeam = this.getTeamById(gameData.away)
         
         // Ensure both teams have valid data
         if (!homeTeam || !awayTeam || !homeTeam.city || !awayTeam.city) {
-          console.error(`Invalid team data for game ${gameId}:`, { homeTeam, awayTeam })
+          console.error(`❌ Invalid team data for game ${gameId}:`, { 
+            homeTeam: homeTeam?.city || 'missing', 
+            awayTeam: awayTeam?.city || 'missing' 
+          })
           return null
         }
         
-        return {
+        const game = {
           id: gameId,
           week,
           homeTeam,
@@ -395,8 +400,11 @@ export class RealSportsAPI {
           isCompleted: false,
           isPreseason: true
         }
+        
+        console.log(`✅ Created game: ${game.awayTeam.city} @ ${game.homeTeam.city}`)
+        return game
       } catch (error) {
-        console.error(`Error creating preseason game ${index}:`, error)
+        console.error(`❌ Error creating preseason game ${index}:`, error)
         return null
       }
     }).filter((game): game is NFLGame => game !== null)
@@ -411,7 +419,7 @@ export class RealSportsAPI {
   private getTeamById(id: string): NFLTeam {
     const team = NFL_TEAMS.find(t => t.id === id)
     if (!team) {
-      console.warn(`Team not found: ${id}, creating fallback team`)
+      console.warn(`❌ Team not found: '${id}' - Available teams:`, NFL_TEAMS.map(t => t.id))
       // Return a fallback team to prevent crashes
       return { 
         id, 
@@ -422,6 +430,7 @@ export class RealSportsAPI {
         division: 'East' 
       }
     }
+    console.log(`✅ Found team: ${id} -> ${team.city} ${team.name}`)
     return team
   }
 

@@ -9,7 +9,7 @@ interface WeeklyScheduleProps {
   week: number
   games: NFLGame[]
   selectedGame: NFLGame | null
-  onGameSelect: (gameId: string) => void
+  onGameSelect: (game: NFLGame) => void
 }
 
 export function WeeklySchedule({ week, games, selectedGame, onGameSelect }: WeeklyScheduleProps) {
@@ -32,7 +32,7 @@ export function WeeklySchedule({ week, games, selectedGame, onGameSelect }: Week
             className={`cursor-pointer transition-all hover:shadow-md ${
               selectedGame?.id === game.id ? 'ring-2 ring-primary' : ''
             } ${game.isCompleted ? 'opacity-75' : ''}`}
-            onClick={() => onGameSelect(game.id)}
+            onClick={() => onGameSelect(game)}
           >
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
