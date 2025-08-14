@@ -107,7 +107,10 @@ function App() {
   }
 
   const currentWeek = getCurrentWeek()
-  const weekOptions = Array.from({ length: 18 }, (_, i) => i + 1)
+  const weekOptions = [
+    ...Array.from({ length: 3 }, (_, i) => -(3 - i)), // Preseason weeks: -3, -2, -1  
+    ...Array.from({ length: 18 }, (_, i) => i + 1)    // Regular season: 1-18
+  ]
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,7 +147,10 @@ function App() {
                   <SelectContent>
                     {weekOptions.map((week) => (
                       <SelectItem key={week} value={week.toString()}>
-                        Week {week} {week === currentWeek && '(Current)'}
+                        {week < 0 
+                          ? `Preseason Week ${Math.abs(week)}` 
+                          : `Week ${week}`
+                        } {week === currentWeek && '(Current)'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -166,6 +172,7 @@ function App() {
                       <SelectItem key={game.id} value={game.id}>
                         {game.awayTeam.city} @ {game.homeTeam.city} ({game.gameTime})
                         {game.isCompleted && ' - Completed'}
+                        {game.isPreseason && ' - Preseason'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -191,7 +198,10 @@ function App() {
             <Alert className="border-amber-200 bg-amber-50/50">
               <Info className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800">
-                This prediction uses simulated data for demonstration purposes. See the "Data Sources" tab for methodology details.
+                {selectedGame?.isPreseason 
+                  ? 'Preseason prediction using simulated data - perfect for testing the prediction system!'
+                  : 'This prediction uses simulated data for demonstration purposes. See the "Data Sources" tab for methodology details.'
+                }
               </AlertDescription>
             </Alert>
 
@@ -311,7 +321,12 @@ function App() {
             {Array.isArray(weekGames) && weekGames.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Week {selectedWeek} Games</CardTitle>
+                  <CardTitle>
+                    {selectedWeek < 0 
+                      ? `Preseason Week ${Math.abs(selectedWeek)} Games` 
+                      : `Week ${selectedWeek} Games`
+                    }
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <WeeklySchedule 

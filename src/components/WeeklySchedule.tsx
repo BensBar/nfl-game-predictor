@@ -14,10 +14,11 @@ interface WeeklyScheduleProps {
 
 export function WeeklySchedule({ week, games, selectedGame, onGameSelect }: WeeklyScheduleProps) {
   if (games.length === 0) {
+    const weekDisplay = week < 0 ? `Preseason Week ${Math.abs(week)}` : `Week ${week}`
     return (
       <div className="text-center py-8">
         <Clock size={48} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-        <p className="text-muted-foreground">No games scheduled for Week {week}</p>
+        <p className="text-muted-foreground">No games scheduled for {weekDisplay}</p>
       </div>
     )
   }
@@ -39,6 +40,11 @@ export function WeeklySchedule({ week, games, selectedGame, onGameSelect }: Week
                   <Badge variant={game.isCompleted ? "secondary" : "default"}>
                     {game.isCompleted ? 'Final' : game.gameTime}
                   </Badge>
+                  {game.isPreseason && (
+                    <Badge variant="outline" className="text-xs">
+                      Preseason
+                    </Badge>
+                  )}
                   {game.isCompleted && (
                     <CheckCircle size={16} className="text-green-600" />
                   )}
@@ -98,7 +104,7 @@ export function WeeklySchedule({ week, games, selectedGame, onGameSelect }: Week
 
       {games.filter(g => !g.isCompleted).length === 0 && (
         <div className="text-center py-6 text-muted-foreground">
-          All games for Week {week} have been completed
+          All games for {week < 0 ? `Preseason Week ${Math.abs(week)}` : `Week ${week}`} have been completed
         </div>
       )}
     </div>

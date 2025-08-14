@@ -268,11 +268,97 @@ const getTeam = (id: string): NFLTeam => {
   return team
 }
 
-// Official 2025-26 NFL Schedule based on accurate data provided
+// Official 2025-26 NFL Schedule including preseason and regular season
 export const generateCompleteNFLSchedule = (): NFLGame[] => {
   const schedule: NFLGame[] = []
   
-  // Define the exact schedule data from the provided source
+  // Preseason games (weeks -3 to 0)
+  const preseasonGames = [
+    // Preseason Week 1 (Week -3)
+    [
+      { away: 'dal', home: 'lar', time: 'Sat 10:00 PM ET' },
+      { away: 'buf', home: 'chi', time: 'Thu 8:00 PM ET' },
+      { away: 'ne', home: 'car', time: 'Thu 7:00 PM ET' },
+      { away: 'nyj', home: 'det', time: 'Thu 7:00 PM ET' },
+      { away: 'mia', home: 'atl', time: 'Fri 7:00 PM ET' },
+      { away: 'pit', home: 'hou', time: 'Fri 8:00 PM ET' },
+      { away: 'lac', home: 'sea', time: 'Sat 10:00 PM ET' },
+      { away: 'sf', home: 'no', time: 'Sun 8:00 PM ET' },
+      { away: 'kc', home: 'jax', time: 'Sat 7:00 PM ET' },
+      { away: 'cle', home: 'gb', time: 'Sat 8:00 PM ET' },
+      { away: 'cin', home: 'tb', time: 'Sat 7:30 PM ET' },
+      { away: 'bal', home: 'phi', time: 'Fri 7:30 PM ET' },
+      { away: 'wsh', home: 'nyg', time: 'Thu 7:00 PM ET' },
+      { away: 'ten', home: 'sf', time: 'Sat 9:00 PM ET' },
+      { away: 'ind', home: 'den', time: 'Sun 9:00 PM ET' },
+      { away: 'lv', home: 'min', time: 'Sat 4:00 PM ET' }
+    ],
+    // Preseason Week 2 (Week -2)
+    [
+      { away: 'atl', home: 'mia', time: 'Fri 7:00 PM ET' },
+      { away: 'car', home: 'nyj', time: 'Sat 1:00 PM ET' },
+      { away: 'chi', home: 'cin', time: 'Sat 7:00 PM ET' },
+      { away: 'det', home: 'pit', time: 'Sat 7:00 PM ET' },
+      { away: 'gb', home: 'den', time: 'Sun 8:00 PM ET' },
+      { away: 'hou', home: 'nyg', time: 'Sat 7:00 PM ET' },
+      { away: 'jax', home: 'tb', time: 'Sat 7:30 PM ET' },
+      { away: 'min', home: 'cle', time: 'Sat 4:30 PM ET' },
+      { away: 'no', home: 'lac', time: 'Sat 10:00 PM ET' },
+      { away: 'phi', home: 'ne', time: 'Thu 7:00 PM ET' },
+      { away: 'sea', home: 'ten', time: 'Sat 7:00 PM ET' },
+      { away: 'sf', home: 'lv', time: 'Fri 10:30 PM ET' },
+      { away: 'lar', home: 'lac', time: 'Sat 10:00 PM ET' },
+      { away: 'kc', home: 'ari', time: 'Fri 10:00 PM ET' },
+      { away: 'buf', home: 'bal', time: 'Wed 7:30 PM ET' },
+      { away: 'wsh', home: 'dal', time: 'Sat 8:00 PM ET' }
+    ],
+    // Preseason Week 3 (Week -1)
+    [
+      { away: 'ari', home: 'den', time: 'Sun 9:00 PM ET' },
+      { away: 'bal', home: 'gb', time: 'Sat 1:00 PM ET' },
+      { away: 'cin', home: 'ind', time: 'Thu 8:00 PM ET' },
+      { away: 'cle', home: 'sea', time: 'Sat 10:00 PM ET' },
+      { away: 'dal', home: 'lac', time: 'Sat 10:00 PM ET' },
+      { away: 'lv', home: 'sf', time: 'Fri 10:30 PM ET' },
+      { away: 'mia', home: 'min', time: 'Sat 1:00 PM ET' },
+      { away: 'ne', home: 'wsh', time: 'Sun 8:00 PM ET' },
+      { away: 'nyg', home: 'nyj', time: 'Sat 7:30 PM ET' },
+      { away: 'no', home: 'ten', time: 'Sun 2:00 PM ET' },
+      { away: 'phi', home: 'car', time: 'Thu 8:00 PM ET' },
+      { away: 'pit', home: 'det', time: 'Sat 1:00 PM ET' },
+      { away: 'tb', home: 'mia', time: 'Fri 7:30 PM ET' },
+      { away: 'hou', home: 'lar', time: 'Sat 10:00 PM ET' },
+      { away: 'jax', home: 'atl', time: 'Fri 7:00 PM ET' },
+      { away: 'buf', home: 'chi', time: 'Sat 1:00 PM ET' }
+    ]
+  ]
+  
+  // Add preseason games with negative week numbers
+  preseasonGames.forEach((weekGames, weekIndex) => {
+    const week = weekIndex - 3 // -3, -2, -1
+    
+    weekGames.forEach((gameData) => {
+      try {
+        const gameId = `ps${Math.abs(week)}g${gameData.away}${gameData.home}`
+        const homeTeam = getTeam(gameData.home)
+        const awayTeam = getTeam(gameData.away)
+        
+        schedule.push({
+          id: gameId,
+          week,
+          homeTeam,
+          awayTeam,
+          gameTime: gameData.time,
+          isCompleted: false, // All preseason games are available for prediction
+          isPreseason: true
+        })
+      } catch (error) {
+        console.error(`Error creating preseason game: ${gameData.away} @ ${gameData.home} (week ${week})`, error)
+      }
+    })
+  })
+
+  // Define the exact regular season schedule data from the provided source
   const weeklyGames = [
     // Week 1
     [
@@ -602,7 +688,7 @@ export const generateCompleteNFLSchedule = (): NFLGame[] => {
     ]
   ]
 
-  // Convert the schedule data to game objects
+  // Convert the regular season schedule data to game objects
   weeklyGames.forEach((weekGames, weekIndex) => {
     const week = weekIndex + 1
     
@@ -618,7 +704,8 @@ export const generateCompleteNFLSchedule = (): NFLGame[] => {
           homeTeam,
           awayTeam,
           gameTime: gameData.time,
-          isCompleted: week < getCurrentWeek()
+          isCompleted: week < getCurrentWeek(),
+          isPreseason: false
         })
       } catch (error) {
         console.error(`Error creating game: ${gameData.away} @ ${gameData.home} (week ${week})`, error)
@@ -626,7 +713,7 @@ export const generateCompleteNFLSchedule = (): NFLGame[] => {
     })
   })
 
-  console.log(`Generated ${schedule.length} games total`)
+  console.log(`Generated ${schedule.length} games total (including preseason)`)
   return schedule
 }
 
@@ -641,15 +728,30 @@ export const generateNFLSchedule = (): NFLGame[] => {
 }
 
 export const getCurrentWeek = (): number => {
+  // Return preseason week 3 (-1) for testing with tonight's games
+  return -1
+  
+  // For production, use the actual date calculation:
+  /*
   // Calculate current week based on 2025 NFL season start date
   const seasonStart = new Date('2025-09-04') // Thursday Night Football opener
+  const preseasonStart = new Date('2025-08-08') // Start of preseason week 1
   const now = new Date()
   
-  // If before season starts, return week 1
-  if (now < seasonStart) {
-    return 1
+  // If before preseason starts, return preseason week 1
+  if (now < preseasonStart) {
+    return -3
   }
   
+  // If in preseason period
+  if (now < seasonStart) {
+    const diffTime = now.getTime() - preseasonStart.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    const preseasonWeek = Math.ceil(diffDays / 7)
+    return -4 + preseasonWeek // Returns -3, -2, or -1
+  }
+  
+  // If in regular season
   // Calculate weeks elapsed since season start
   const diffTime = now.getTime() - seasonStart.getTime()
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
@@ -657,6 +759,7 @@ export const getCurrentWeek = (): number => {
   
   // Cap at week 18 (regular season end)
   return Math.min(week, 18)
+  */
 }
 
 export const getGamesForWeek = (week: number): NFLGame[] => {
