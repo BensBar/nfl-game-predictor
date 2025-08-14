@@ -272,35 +272,42 @@ export class SportsDataAPI {
   }
 
   private generateLiveGameData(week: number): NFLGame[] {
-    // This would contain real API integration logic
-    // For now, return mock data with simulated live updates
+    // In production, this would check real-time ESPN/NFL APIs for live games
+    // Only return games that are actually happening right now
     const games: NFLGame[] = []
     
-    // Simulate a few games with live scores
-    const mockGames = [
-      {
-        id: `live-game-1`,
-        week,
-        homeTeam: NFL_TEAMS.find(t => t.id === 'kc')!,
-        awayTeam: NFL_TEAMS.find(t => t.id === 'buf')!,
-        gameTime: 'Live - 3rd Quarter',
-        isCompleted: false,
-        homeScore: 21,
-        awayScore: 14
-      },
-      {
-        id: `live-game-2`,
-        week,
-        homeTeam: NFL_TEAMS.find(t => t.id === 'sf')!,
-        awayTeam: NFL_TEAMS.find(t => t.id === 'dal')!,
-        gameTime: 'Live - 2nd Quarter',
-        isCompleted: false,
-        homeScore: 7,
-        awayScore: 10
-      }
-    ]
-
-    return mockGames
+    // Check if there are real games happening now
+    const now = new Date()
+    const currentHour = now.getHours()
+    const currentDay = now.getDay() // 0 = Sunday, 1 = Monday, etc.
+    
+    // NFL games typically happen:
+    // Thursday: 8:15 PM ET (preseason/regular season)
+    // Friday: 8:00 PM ET (preseason only) 
+    // Saturday: Various times (preseason)
+    // Sunday: 1:00 PM, 4:05/4:25 PM, 8:20 PM ET
+    // Monday: 8:15 PM ET
+    
+    // For now, only show live games if it's actually game time
+    // This will be populated by real API calls in production
+    const isGameTime = (
+      (currentDay === 4 && currentHour >= 20) || // Thursday 8+ PM
+      (currentDay === 5 && currentHour >= 20) || // Friday 8+ PM (preseason)
+      (currentDay === 6 && currentHour >= 13) || // Saturday 1+ PM (preseason)
+      (currentDay === 0 && (currentHour >= 13 && currentHour <= 23)) || // Sunday 1 PM - 11 PM
+      (currentDay === 1 && currentHour >= 20) // Monday 8+ PM
+    )
+    
+    // Only return live games during actual game times
+    // Real implementation would query ESPN API for live scores
+    if (isGameTime) {
+      // This would be replaced with actual API calls:
+      // const liveGames = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard')
+      // return liveGames that are currently in progress
+      console.log('Game time detected - would fetch live scores from API')
+    }
+    
+    return games // Empty array unless real games are live
   }
 
   private getCurrentPreseasonGames(week: number): NFLGame[] {

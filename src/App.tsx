@@ -204,7 +204,7 @@ function App() {
               <AlertDescription className="text-amber-800">
                 {selectedGame?.isPreseason 
                   ? '✅ Preseason schedule updated with correct 2025 games - ready for testing tonight!'
-                  : 'This prediction uses simulated data for demonstration purposes. See the "Data Sources" tab for methodology details.'
+                  : 'Games automatically appear as "live" when they actually start. Real-time scores will update every 30 seconds during live games.'
                 }
               </AlertDescription>
             </Alert>

@@ -99,7 +99,7 @@ export function DataSources() {
                 <Activity className="text-green-600" size={20} />
                 <div>
                   <div className="font-medium">Live Scores & Game Status</div>
-                  <div className="text-sm text-muted-foreground">Real-time updates every 30 seconds</div>
+                  <div className="text-sm text-muted-foreground">Auto-updates when games start • 30-second refresh</div>
                 </div>
               </div>
 

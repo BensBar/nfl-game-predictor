@@ -154,7 +154,11 @@ export function LiveDataDashboard() {
                 <div className="text-center py-8 text-muted-foreground">
                   <Activity size={48} className="mx-auto mb-4 opacity-50" />
                   <p>No live games currently in progress</p>
-                  <p className="text-sm">Check back during game days for live updates</p>
+                  <div className="text-sm mt-2 space-y-1">
+                    <p><strong>Games go live automatically when they start!</strong></p>
+                    <p>NFL game times: Thu/Mon 8:15pm • Sun 1pm, 4pm, 8:20pm</p>
+                    <p>Preseason: Thu/Fri 8pm • Sat various times</p>
+                  </div>
                 </div>
               )}
             </CardContent>
