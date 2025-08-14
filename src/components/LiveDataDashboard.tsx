@@ -11,18 +11,18 @@ import { LiveGamesGrid } from './LiveGamesGrid'
 import { PredictionService } from '@/lib/prediction-service'
 import { 
   Activity, 
-  Wifi, 
-  WifiOff, 
-  RefreshCw, 
+  WifiHigh, 
+  WifiX, 
+  ArrowClockwise, 
   Clock, 
-  AlertTriangle,
+  Warning,
   CheckCircle,
   Database,
   Zap,
-  TrendingUp,
+  TrendUp,
   Target,
   Calendar,
-  ExternalLink
+  Link
 } from '@phosphor-icons/react'
 
 interface LiveDataDashboardProps {
@@ -53,9 +53,9 @@ export function LiveDataDashboard({
       case 'available':
         return <CheckCircle className="text-green-600" size={16} />
       case 'rate-limited':
-        return <AlertTriangle className="text-yellow-600" size={16} />
+        return <Warning className="text-yellow-600" size={16} />
       default:
-        return <WifiOff className="text-red-600" size={16} />
+        return <WifiX className="text-red-600" size={16} />
     }
   }
 
@@ -80,7 +80,7 @@ export function LiveDataDashboard({
             onClick={() => setAutoRefresh(!autoRefresh)}
             className="flex items-center gap-2"
           >
-            {autoRefresh ? <Wifi size={16} /> : <WifiOff size={16} />}
+            {autoRefresh ? <WifiHigh size={16} /> : <WifiX size={16} />}
             {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
           </Button>
           
@@ -91,7 +91,7 @@ export function LiveDataDashboard({
             disabled={loading}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={loading ? 'animate-spin' : ''} size={16} />
+            <ArrowClockwise className={loading ? 'animate-spin' : ''} size={16} />
             Refresh
           </Button>
           
@@ -120,7 +120,7 @@ export function LiveDataDashboard({
 
       {error && (
         <Alert className="border-red-200 bg-red-50/50">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <Warning className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800">
             {error}
           </AlertDescription>
@@ -134,11 +134,11 @@ export function LiveDataDashboard({
             Current Week
           </TabsTrigger>
           <TabsTrigger value="live-scores" className="flex items-center gap-2">
-            <TrendingUp size={16} />
+            <TrendUp size={16} />
             Live Scores
           </TabsTrigger>
           <TabsTrigger value="api-status" className="flex items-center gap-2">
-            <Wifi size={16} />
+            <WifiHigh size={16} />
             API Status
           </TabsTrigger>
           <TabsTrigger value="data-sources" className="flex items-center gap-2">
@@ -171,7 +171,7 @@ export function LiveDataDashboard({
             <CardContent>
               {loading && liveScores.length === 0 ? (
                 <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="animate-spin mr-2" size={20} />
+                  <ArrowClockwise className="animate-spin mr-2" size={20} />
                   Loading live scores...
                 </div>
               ) : liveScores.length > 0 ? (
@@ -252,19 +252,19 @@ export function LiveDataDashboard({
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>ESPN Sports API - Live scores, team rankings</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>NFL.com Official - Player stats, game results</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>CBS Sports - Injury reports, depth charts</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                   </div>
@@ -272,26 +272,26 @@ export function LiveDataDashboard({
                 
                 <div className="space-y-3">
                   <h4 className="font-medium flex items-center gap-2">
-                    <TrendingUp size={16} className="text-green-600" />
+                    <TrendUp size={16} className="text-green-600" />
                     Analytics Providers
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>Pro Football Reference - Historical stats</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>Football Outsiders - Advanced metrics</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>PFF - Player grades & analytics</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                   </div>
@@ -306,19 +306,19 @@ export function LiveDataDashboard({
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>OpenWeather API - Game day conditions</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>NOAA Weather - Temperature, wind</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>Stadium Data - Surface, dome status</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                   </div>
@@ -333,19 +333,19 @@ export function LiveDataDashboard({
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>DraftKings - Point spreads, totals</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>FanDuel - Market consensus</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                     <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
                       <span>The Odds API - Line movement tracking</span>
                       <Button variant="ghost" size="sm" className="h-6 px-2">
-                        <ExternalLink size={12} />
+                        <Link size={12} />
                       </Button>
                     </div>
                   </div>

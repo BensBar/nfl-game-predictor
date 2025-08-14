@@ -15,7 +15,7 @@ import { DataSources } from '@/components/DataSources'
 import { LiveDataDashboard } from '@/components/LiveDataDashboard'
 import { AccuracyDashboard } from '@/components/AccuracyDashboard'
 import { GameResultTracker } from '@/components/GameResultTracker'
-import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp, Heart, DollarSign, Trophy, RefreshCw } from '@phosphor-icons/react'
+import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendUp, Heart, CurrencyDollar, Trophy, ArrowClockwise } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 function App() {
@@ -140,7 +140,7 @@ function App() {
               Accuracy
             </TabsTrigger>
             <TabsTrigger value="results" className="flex items-center gap-2">
-              <RefreshCw size={16} />
+              <ArrowClockwise size={16} />
               Results
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">

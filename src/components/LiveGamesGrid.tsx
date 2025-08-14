@@ -13,11 +13,11 @@ import {
   Activity, 
   Target, 
   Clock, 
-  TrendingUp,
-  RefreshCw,
+  TrendUp,
+  ArrowClockwise,
   Calendar,
   Zap,
-  AlertTriangle
+  Warning
 } from '@phosphor-icons/react'
 
 interface LiveGamesGridProps {
@@ -98,9 +98,9 @@ export function LiveGamesGrid({ games, currentWeek, onForceRefresh, isRefreshing
                     className="text-xs"
                   >
                     {isRefreshing ? (
-                      <RefreshCw size={12} className="animate-spin mr-1" />
+                      <ArrowClockwise size={12} className="animate-spin mr-1" />
                     ) : (
-                      <RefreshCw size={12} className="mr-1" />
+                      <ArrowClockwise size={12} className="mr-1" />
                     )}
                     Refresh Now
                   </Button>
@@ -136,7 +136,7 @@ export function LiveGamesGrid({ games, currentWeek, onForceRefresh, isRefreshing
           
           {predictions.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              <RefreshCw size={48} className="mx-auto mb-4 opacity-50" />
+              <ArrowClockwise size={48} className="mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium mb-2">Generating Predictions</p>
               <p className="text-sm">
                 AI predictions are being generated for all games. This may take a few minutes...
@@ -194,7 +194,7 @@ export function LiveGamesGrid({ games, currentWeek, onForceRefresh, isRefreshing
                     <div>Prediction ID: {selectedPrediction.id}</div>
                     {selectedPrediction.isStale && (
                       <div className="flex items-center gap-1 text-yellow-600">
-                        <AlertTriangle size={12} />
+                        <Warning size={12} />
                         This prediction is older than 12 hours
                       </div>
                     )}
@@ -265,7 +265,7 @@ function GamePredictionCard({ game, prediction, onClick, hasPrediction, isStale 
             )}
             {isStale && (
               <Badge variant="outline" className="text-yellow-600 border-yellow-600 text-xs">
-                <AlertTriangle size={10} className="mr-1" />
+                <Warning size={10} className="mr-1" />
                 STALE
               </Badge>
             )}
@@ -301,7 +301,7 @@ function GamePredictionCard({ game, prediction, onClick, hasPrediction, isStale 
                 </div>
               ) : (
                 <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground py-2">
-                  <RefreshCw size={12} className="animate-spin" />
+                  <ArrowClockwise size={12} className="animate-spin" />
                   Generating prediction...
                 </div>
               )}
