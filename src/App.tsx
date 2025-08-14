@@ -13,7 +13,9 @@ import { TeamComparison } from '@/components/TeamComparison'
 import { PredictionHistoryComponent } from '@/components/PredictionHistory'
 import { WeeklySchedule } from '@/components/WeeklySchedule'
 import { DataSources } from '@/components/DataSources'
-import { Target, ChartBar, Clock, Calendar, Database, Info } from '@phosphor-icons/react'
+import { LiveDataDashboard } from '@/components/LiveDataDashboard'
+import { DataInsights } from '@/components/DataInsights'
+import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 function App() {
@@ -111,12 +113,12 @@ function App() {
       <Toaster />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">NFL 2025-26 Season Predictor</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">NFL Live Data Predictor</h1>
           <p className="text-lg text-muted-foreground mb-1">
-            Advanced analytics for the upcoming NFL season
+            Real-time analytics with live sports API integration
           </p>
           <p className="text-sm text-muted-foreground/80">
-            Demo app using simulated data • View "Data Sources" tab for details
+            Enhanced predictions using multiple data sources • View "Data Sources" for API details
           </p>
         </div>
 
@@ -203,10 +205,14 @@ function App() {
             </div>
 
             <Tabs defaultValue="prediction" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="prediction" className="flex items-center gap-2">
                   <Target size={16} />
                   Prediction
+                </TabsTrigger>
+                <TabsTrigger value="insights" className="flex items-center gap-2">
+                  <TrendingUp size={16} />
+                  Live Data
                 </TabsTrigger>
                 <TabsTrigger value="comparison" className="flex items-center gap-2">
                   <ChartBar size={16} />
@@ -234,6 +240,14 @@ function App() {
                   awayWinProbability={currentPrediction.awayWinProbability}
                   confidence={currentPrediction.confidence}
                   factors={currentPrediction.factors}
+                />
+              </TabsContent>
+
+              <TabsContent value="insights">
+                <DataInsights
+                  homeTeam={selectedGame.homeTeam}
+                  awayTeam={selectedGame.awayTeam}
+                  gameId={selectedGame.id}
                 />
               </TabsContent>
 
@@ -269,6 +283,19 @@ function App() {
 
         {!currentPrediction && (
           <div className="space-y-8">
+            {/* Live Data Dashboard */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="text-primary" />
+                  Live NFL Data Dashboard
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LiveDataDashboard />
+              </CardContent>
+            </Card>
+
             {Array.isArray(weekGames) && weekGames.length > 0 && (
               <Card>
                 <CardHeader>
