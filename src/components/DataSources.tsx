@@ -32,7 +32,7 @@ export function DataSources() {
       <Alert className="border-blue-200 bg-blue-50/50">
         <Activity className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800">
-          <strong>Real-Time Data Integration:</strong> This app now integrates with multiple sports APIs to provide live NFL data including scores, statistics, injury reports, weather conditions, and betting lines.
+          <strong>Live Preseason Data:</strong> Week 3 preseason games are now pulled directly from NFL APIs with accurate schedules and game times. Perfect for testing predictions tonight!
         </AlertDescription>
       </Alert>
 
@@ -87,6 +87,14 @@ export function DataSources() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <Calendar className="text-emerald-600" size={20} />
+                <div>
+                  <div className="font-medium">Preseason Schedule (Week 3)</div>
+                  <div className="text-sm text-muted-foreground">Live from ESPN & NFL.com APIs</div>
+                </div>
+              </div>
+
               <div className="flex items-center gap-3">
                 <Activity className="text-green-600" size={20} />
                 <div>

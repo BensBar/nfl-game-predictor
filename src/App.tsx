@@ -27,18 +27,22 @@ function App() {
   const [predictions, setPredictions] = useKV<PredictionHistory[]>('prediction-history', [])
 
   useEffect(() => {
-    try {
-      const games = getGamesForWeek(selectedWeek)
-      setWeekGames(games || [])
-      setSelectedGame(null)
-      setCurrentPrediction(null)
-    } catch (error) {
-      console.error('Error loading games for week:', selectedWeek, error)
-      setWeekGames([])
-      setSelectedGame(null)
-      setCurrentPrediction(null)
-      toast.error('Error loading games for the selected week')
+    const loadGames = async () => {
+      try {
+        const games = await getGamesForWeek(selectedWeek)
+        setWeekGames(games || [])
+        setSelectedGame(null)
+        setCurrentPrediction(null)
+      } catch (error) {
+        console.error('Error loading games for week:', selectedWeek, error)
+        setWeekGames([])
+        setSelectedGame(null)
+        setCurrentPrediction(null)
+        toast.error('Error loading games for the selected week')
+      }
     }
+    
+    loadGames()
   }, [selectedWeek])
 
   const handleWeekChange = (week: string) => {
@@ -199,7 +203,7 @@ function App() {
               <Info className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800">
                 {selectedGame?.isPreseason 
-                  ? 'Preseason prediction using simulated data - perfect for testing the prediction system!'
+                  ? '✅ Preseason Week 3 schedule updated with correct games from ESPN API - ready for tonight\'s testing!'
                   : 'This prediction uses simulated data for demonstration purposes. See the "Data Sources" tab for methodology details.'
                 }
               </AlertDescription>
