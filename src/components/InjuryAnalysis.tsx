@@ -16,14 +16,14 @@ import {
 import { NFLTeam, PlayerInjury, InjuryImpactAnalysis } from '@/types/nfl'
 import { 
   Heart, 
-  TrendingDown, 
-  AlertTriangle, 
+  TrendDown, 
+  Warning, 
   Shield, 
   Users, 
   Activity,
   Clock,
   Target,
-  RefreshCw,
+  ArrowClockwise,
   Database
 } from '@phosphor-icons/react'
 
@@ -68,7 +68,7 @@ export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <RefreshCw className="animate-spin mr-2" size={20} />
+        <ArrowClockwise className="animate-spin mr-2" size={20} />
         Loading real-time injury reports...
       </div>
     )
@@ -225,7 +225,7 @@ export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {analysis.riskFactors.length > 0 && (
           <Alert className="border-red-200 bg-red-50/50">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <Warning className="h-4 w-4 text-red-600" />
             <AlertDescription>
               <div className="font-medium text-red-800 mb-2">Risk Factors:</div>
               <ul className="text-sm text-red-700 space-y-1">
@@ -348,7 +348,7 @@ export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingDown className="text-primary" />
+            <TrendDown className="text-primary" />
             {currentTeam.city} {currentTeam.name} - Injury Impact Analysis
           </CardTitle>
         </CardHeader>
@@ -363,7 +363,7 @@ export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
             <TabsContent value="overview">
               {currentAnalysis ? renderImpactAnalysis(currentAnalysis) : (
                 <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="animate-spin mr-2" size={20} />
+                  <ArrowClockwise className="animate-spin mr-2" size={20} />
                   Loading injury analysis...
                 </div>
               )}

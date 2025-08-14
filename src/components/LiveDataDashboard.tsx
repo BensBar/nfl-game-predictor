@@ -18,7 +18,7 @@ import {
   Warning,
   CheckCircle,
   Database,
-  Zap,
+  Lightning,
   TrendUp,
   Target,
   Calendar,
@@ -146,7 +146,7 @@ export function LiveDataDashboard({
             Data Sources
           </TabsTrigger>
           <TabsTrigger value="performance" className="flex items-center gap-2">
-            <Zap size={16} />
+            <Lightning size={16} />
             Performance
           </TabsTrigger>
         </TabsList>
@@ -326,7 +326,7 @@ export function LiveDataDashboard({
                 
                 <div className="space-y-3">
                   <h4 className="font-medium flex items-center gap-2">
-                    <Zap size={16} className="text-purple-600" />
+                    <Lightning size={16} className="text-purple-600" />
                     Betting & Market Data
                   </h4>
                   <div className="space-y-2 text-sm">

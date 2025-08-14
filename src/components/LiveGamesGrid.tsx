@@ -16,7 +16,7 @@ import {
   TrendUp,
   ArrowClockwise,
   Calendar,
-  Zap,
+  Lightning,
   Warning
 } from '@phosphor-icons/react'
 

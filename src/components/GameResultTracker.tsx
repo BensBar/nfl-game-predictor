@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { AccuracyTracker } from '@/lib/accuracy-tracker'
 import { PredictionOutcome } from '@/types/accuracy'
-import { Check, X, Clock, RefreshCw, AlertCircle, Calendar } from '@phosphor-icons/react'
+import { Check, X, Clock, ArrowClockwise, Warning, Calendar } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface GameResultTrackerProps {
@@ -81,7 +81,7 @@ export function GameResultTracker({ gameId, homeTeam, awayTeam }: GameResultTrac
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <RefreshCw className="text-primary animate-spin" size={20} />
+            <ArrowClockwise className="text-primary animate-spin" size={20} />
             Loading Game Results...
           </CardTitle>
         </CardHeader>
@@ -148,7 +148,7 @@ export function GameResultTracker({ gameId, homeTeam, awayTeam }: GameResultTrac
                 </div>
               </div>
               <Badge variant="outline" className="flex items-center gap-1">
-                <AlertCircle size={12} />
+                <Warning size={12} />
                 Pending Result
               </Badge>
             </div>
@@ -178,7 +178,7 @@ export function GameResultTracker({ gameId, homeTeam, awayTeam }: GameResultTrac
                   className="flex items-center gap-1"
                 >
                   {updatingResult === outcome.gameId ? (
-                    <RefreshCw size={14} className="animate-spin" />
+                    <ArrowClockwise size={14} className="animate-spin" />
                   ) : null}
                   {outcome.homeTeam}
                 </Button>
@@ -190,7 +190,7 @@ export function GameResultTracker({ gameId, homeTeam, awayTeam }: GameResultTrac
                   className="flex items-center gap-1"
                 >
                   {updatingResult === outcome.gameId ? (
-                    <RefreshCw size={14} className="animate-spin" />
+                    <ArrowClockwise size={14} className="animate-spin" />
                   ) : null}
                   {outcome.awayTeam}
                 </Button>
@@ -205,7 +205,7 @@ export function GameResultTracker({ gameId, homeTeam, awayTeam }: GameResultTrac
             onClick={loadPredictionOutcomes}
             className="flex items-center gap-2"
           >
-            <RefreshCw size={16} />
+            <ArrowClockwise size={16} />
             Refresh Results
           </Button>
         </div>

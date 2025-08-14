@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { NFLTeam, TeamStats, GameResult } from '@/types/nfl'
 import { getTeamStats, getRecentGames } from '@/lib/nfl-data'
-import { TrendUp, TrendDown, RefreshCw } from '@phosphor-icons/react'
+import { TrendUp, TrendDown, ArrowClockwise } from '@phosphor-icons/react'
 
 interface TeamComparisonProps {
   homeTeam: NFLTeam
@@ -56,7 +56,7 @@ export function TeamComparison({ homeTeam, awayTeam }: TeamComparisonProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <RefreshCw className="animate-spin mr-2" size={20} />
+        <ArrowClockwise className="animate-spin mr-2" size={20} />
         Loading real-time team statistics...
       </div>
     )
