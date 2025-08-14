@@ -114,25 +114,78 @@ export const calculatePrediction = (homeTeam: NFLTeam, awayTeam: NFLTeam) => {
   
   const factors: string[] = []
   
+  // Import injury analysis dynamically to avoid circular dependency
+  let homeInjuryAnalysis: any = { totalImpactScore: 0, offensiveImpact: 0, defensiveImpact: 0, keyPlayerInjuries: [] }
+  let awayInjuryAnalysis: any = { totalImpactScore: 0, offensiveImpact: 0, defensiveImpact: 0, keyPlayerInjuries: [] }
+  
+  try {
+    const { analyzeTeamInjuryImpact } = require('./injury-analysis')
+    homeInjuryAnalysis = analyzeTeamInjuryImpact(homeTeam)
+    awayInjuryAnalysis = analyzeTeamInjuryImpact(awayTeam)
+  } catch (error) {
+    console.warn('Injury analysis not available:', error)
+  }
+  
+  // Apply injury impact (negative impact reduces team performance)
+  const homeInjuryPenalty = homeInjuryAnalysis.totalImpactScore * 0.5
+  const awayInjuryPenalty = awayInjuryAnalysis.totalImpactScore * 0.5
+  
+  homeScore -= homeInjuryPenalty
+  awayScore -= awayInjuryPenalty
+  
+  // Add injury factors if significant
+  if (homeInjuryAnalysis.totalImpactScore > awayInjuryAnalysis.totalImpactScore + 2) {
+    factors.push(`${homeTeam.city} dealing with more injury issues`)
+  } else if (awayInjuryAnalysis.totalImpactScore > homeInjuryAnalysis.totalImpactScore + 2) {
+    factors.push(`${awayTeam.city} dealing with more injury issues`)
+  }
+  
+  // Key player injury impact
+  if (homeInjuryAnalysis.keyPlayerInjuries && homeInjuryAnalysis.keyPlayerInjuries.length > 0) {
+    const keyInjuryImpact = homeInjuryAnalysis.keyPlayerInjuries.reduce((sum: number, inj: any) => sum + inj.severityRating, 0)
+    homeScore -= keyInjuryImpact * 0.3
+    if (homeInjuryAnalysis.keyPlayerInjuries.some((inj: any) => inj.position === 'QB')) {
+      factors.push(`${homeTeam.city} QB injury concern`)
+    }
+  }
+  
+  if (awayInjuryAnalysis.keyPlayerInjuries && awayInjuryAnalysis.keyPlayerInjuries.length > 0) {
+    const keyInjuryImpact = awayInjuryAnalysis.keyPlayerInjuries.reduce((sum: number, inj: any) => sum + inj.severityRating, 0)
+    awayScore -= keyInjuryImpact * 0.3
+    if (awayInjuryAnalysis.keyPlayerInjuries.some((inj: any) => inj.position === 'QB')) {
+      factors.push(`${awayTeam.city} QB injury concern`)
+    }
+  }
+  
   // Offensive efficiency
   const homeOffense = homeStats.pointsPerGame + homeStats.totalYards / 25
   const awayOffense = awayStats.pointsPerGame + awayStats.totalYards / 25
-  if (homeOffense > awayOffense) {
-    homeScore += (homeOffense - awayOffense) * 0.3
+  
+  // Apply offensive injury impact
+  const homeOffenseAdjusted = homeOffense - (homeInjuryAnalysis.offensiveImpact * 0.8)
+  const awayOffenseAdjusted = awayOffense - (awayInjuryAnalysis.offensiveImpact * 0.8)
+  
+  if (homeOffenseAdjusted > awayOffenseAdjusted) {
+    homeScore += (homeOffenseAdjusted - awayOffenseAdjusted) * 0.3
     factors.push(`${homeTeam.city} has stronger offense`)
   } else {
-    awayScore += (awayOffense - homeOffense) * 0.3
+    awayScore += (awayOffenseAdjusted - homeOffenseAdjusted) * 0.3
     factors.push(`${awayTeam.city} has stronger offense`)
   }
   
   // Defensive efficiency
   const homeDefense = (450 - homeStats.yardsAllowed) + (35 - homeStats.pointsAllowed)
   const awayDefense = (450 - awayStats.yardsAllowed) + (35 - awayStats.pointsAllowed)
-  if (homeDefense > awayDefense) {
-    homeScore += (homeDefense - awayDefense) * 0.25
+  
+  // Apply defensive injury impact
+  const homeDefenseAdjusted = homeDefense - (homeInjuryAnalysis.defensiveImpact * 0.8)
+  const awayDefenseAdjusted = awayDefense - (awayInjuryAnalysis.defensiveImpact * 0.8)
+  
+  if (homeDefenseAdjusted > awayDefenseAdjusted) {
+    homeScore += (homeDefenseAdjusted - awayDefenseAdjusted) * 0.25
     factors.push(`${homeTeam.city} has better defense`)
   } else {
-    awayScore += (awayDefense - homeDefense) * 0.25
+    awayScore += (awayDefenseAdjusted - homeDefenseAdjusted) * 0.25
     factors.push(`${awayTeam.city} has better defense`)
   }
   
@@ -156,7 +209,13 @@ export const calculatePrediction = (homeTeam: NFLTeam, awayTeam: NFLTeam) => {
   
   // Add home field advantage
   homeScore += homeAdvantage
-  factors.push(`${homeTeam.city} gets home field advantage`)
+  if (!factors.some(f => f.includes('injury'))) {
+    factors.push(`${homeTeam.city} gets home field advantage`)
+  }
+  
+  // Ensure minimum scores to avoid division by zero
+  homeScore = Math.max(homeScore, 1)
+  awayScore = Math.max(awayScore, 1)
   
   const totalScore = homeScore + awayScore
   const homeWinProbability = Math.round((homeScore / totalScore) * 100)
@@ -168,7 +227,7 @@ export const calculatePrediction = (homeTeam: NFLTeam, awayTeam: NFLTeam) => {
     homeWinProbability,
     awayWinProbability,
     confidence: Math.min(confidence, 95),
-    factors: factors.slice(0, 4)
+    factors: factors.slice(0, 5)
   }
 }
 

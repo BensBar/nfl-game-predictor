@@ -106,8 +106,8 @@ export function DataSources() {
               <div className="flex items-center gap-3">
                 <AlertTriangle className="text-orange-600" size={20} />
                 <div>
-                  <div className="font-medium">Injury Reports</div>
-                  <div className="text-sm text-muted-foreground">Updated hourly from official sources</div>
+                  <div className="font-medium">Injury Reports & Impact Analysis</div>
+                  <div className="text-sm text-muted-foreground">Updated hourly with severity ratings</div>
                 </div>
               </div>
 
@@ -147,7 +147,9 @@ export function DataSources() {
                 <Badge variant="default" className="text-xs">Live Data</Badge>
               </div>
               <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                <li>• Current injury status and player availability</li>
+                <li>• Player injury status with severity ratings (1-5 scale)</li>
+                <li>• Position-specific impact analysis</li>
+                <li>• Depth chart and backup player quality assessment</li>
                 <li>• Weather conditions for outdoor games</li>
                 <li>• Recent performance trends and momentum</li>
                 <li>• Home field advantage adjustments</li>

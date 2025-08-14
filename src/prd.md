@@ -37,6 +37,11 @@
 - **Why it matters**: Provides comprehensive context for informed decision-making
 - **Success criteria**: Real-time updates, accurate data presentation, and actionable insights
 
+### Player Injury Impact Analysis
+- **What it does**: Analyzes player injuries with severity ratings and team impact assessment
+- **Why it matters**: Injuries significantly affect game outcomes and prediction accuracy
+- **Success criteria**: Accurate injury data, clear severity ratings, position-specific impact analysis, and team depth assessment
+
 ## Design Direction
 
 ### Visual Tone & Identity
@@ -82,8 +87,8 @@
 - **Component Usage**: Cards for games and predictions, Tabs for organizing views, Select for week/game choice
 - **Component Customization**: Team color accents, prediction confidence indicators
 - **Component States**: Clear selected states for games, disabled states for completed games
-- **Icon Selection**: Calendar for scheduling, Target for predictions, ChartBar for statistics
-- **Component Hierarchy**: Primary prediction button, secondary save actions, tertiary navigation
+- **Icon Selection**: Calendar for scheduling, Target for predictions, ChartBar for statistics, Heart for injury analysis
+- **Component Hierarchy**: Primary prediction button, secondary save actions, injury analysis tabs, tertiary navigation
 - **Spacing System**: Consistent 4-unit spacing scale throughout interface
 - **Mobile Adaptation**: Single column layouts, larger touch targets, simplified navigation
 
@@ -103,7 +108,7 @@
 - **Completed Games**: Clear indication that predictions aren't available for finished games
 - **Off-season**: Graceful handling when no games are scheduled
 - **Loading States**: Smooth transitions while generating predictions
-- **Data Limitations**: Synthetic data clearly represents real NFL team performance patterns
+- **Data Limitations**: Synthetic data clearly represents real NFL team performance patterns and includes realistic injury scenarios with accurate position-based impact analysis
 
 ## Implementation Considerations
 - **Scalability Needs**: Modular prediction algorithm, extensible team data structure

@@ -49,3 +49,41 @@ export interface NFLGame {
   homeScore?: number
   awayScore?: number
 }
+
+export interface PlayerInjury {
+  id: string
+  playerId: string
+  playerName: string
+  position: string
+  team: string
+  injuryType: string
+  bodyPart: string
+  severity: 'Questionable' | 'Doubtful' | 'Out' | 'IR' | 'PUP'
+  severityRating: 1 | 2 | 3 | 4 | 5 // 1 = minimal impact, 5 = season-ending
+  dateReported: string
+  estimatedReturn?: string
+  gameStatus: 'Active' | 'Inactive' | 'Limited' | 'TBD'
+  impactDescription: string
+  lastUpdated: string
+}
+
+export interface InjuryImpactAnalysis {
+  teamId: string
+  totalImpactScore: number
+  offensiveImpact: number
+  defensiveImpact: number
+  specialTeamsImpact: number
+  keyPlayerInjuries: PlayerInjury[]
+  depthChartAffected: string[]
+  predictedPerformanceDrop: number
+  riskFactors: string[]
+  mitigatingFactors: string[]
+}
+
+export interface PositionImpact {
+  position: string
+  importance: number
+  currentInjuries: PlayerInjury[]
+  depthQuality: 'Excellent' | 'Good' | 'Average' | 'Poor' | 'Critical'
+  overallImpact: number
+}

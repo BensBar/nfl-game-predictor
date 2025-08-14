@@ -15,7 +15,8 @@ import { WeeklySchedule } from '@/components/WeeklySchedule'
 import { DataSources } from '@/components/DataSources'
 import { LiveDataDashboard } from '@/components/LiveDataDashboard'
 import { DataInsights } from '@/components/DataInsights'
-import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp } from '@phosphor-icons/react'
+import { InjuryAnalysis } from '@/components/InjuryAnalysis'
+import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp, Heart } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 function App() {
@@ -205,10 +206,14 @@ function App() {
             </div>
 
             <Tabs defaultValue="prediction" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="prediction" className="flex items-center gap-2">
                   <Target size={16} />
                   Prediction
+                </TabsTrigger>
+                <TabsTrigger value="injuries" className="flex items-center gap-2">
+                  <Heart size={16} />
+                  Injuries
                 </TabsTrigger>
                 <TabsTrigger value="insights" className="flex items-center gap-2">
                   <TrendingUp size={16} />
@@ -240,6 +245,13 @@ function App() {
                   awayWinProbability={currentPrediction.awayWinProbability}
                   confidence={currentPrediction.confidence}
                   factors={currentPrediction.factors}
+                />
+              </TabsContent>
+
+              <TabsContent value="injuries">
+                <InjuryAnalysis
+                  homeTeam={selectedGame.homeTeam}
+                  awayTeam={selectedGame.awayTeam}
                 />
               </TabsContent>
 
