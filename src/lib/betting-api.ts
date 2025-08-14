@@ -201,7 +201,7 @@ export function getBettingFactors(comparison: BettingComparison): string[] {
     const favorite = comparison.averageSpread > 0 ? comparison.homeTeam : comparison.awayTeam
     factors.push(`${favorite} heavily favored by ${Math.abs(comparison.averageSpread)} points`)
   } else if (Math.abs(comparison.averageSpread) < 3) {
-    factors.push('Pick'em game - very close spread indicates even matchup')
+    factors.push('Pick\'em game - very close spread indicates even matchup')
   }
 
   // Line movement
