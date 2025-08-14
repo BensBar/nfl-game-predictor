@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Toaster } from '@/components/ui/sonner'
 import { getCurrentWeek, getGamesForWeek, calculatePrediction } from '@/lib/nfl-data'
+import { AccuracyTracker } from '@/lib/accuracy-tracker'
 import { NFLGame, Prediction, PredictionHistory } from '@/types/nfl'
 import { PredictionResult } from '@/components/PredictionResult'
 import { TeamComparison } from '@/components/TeamComparison'
@@ -17,7 +18,9 @@ import { LiveDataDashboard } from '@/components/LiveDataDashboard'
 import { DataInsights } from '@/components/DataInsights'
 import { InjuryAnalysis } from '@/components/InjuryAnalysis'
 import { BettingOddsComparison } from '@/components/BettingOddsComparison'
-import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp, Heart, DollarSign } from '@phosphor-icons/react'
+import { AccuracyDashboard } from '@/components/AccuracyDashboard'
+import { GameResultTracker } from '@/components/GameResultTracker'
+import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp, Heart, DollarSign, Trophy, RefreshCw } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 function App() {
@@ -97,7 +100,26 @@ function App() {
       }
 
       setCurrentPrediction(prediction)
-      toast.success(`🎯 Prediction complete! ${prediction.homeWinProbability > prediction.awayWinProbability ? selectedGame.homeTeam.city : selectedGame.awayTeam.city} favored with ${Math.max(prediction.homeWinProbability, prediction.awayWinProbability)}% probability`)
+      
+      // Record the prediction for accuracy tracking
+      const predictedWinner = prediction.homeWinProbability > prediction.awayWinProbability 
+        ? selectedGame.homeTeam.city 
+        : selectedGame.awayTeam.city
+      
+      await AccuracyTracker.recordPredictionOutcome(
+        prediction.id,
+        selectedGame.id,
+        selectedGame.homeTeam.city,
+        selectedGame.awayTeam.city,
+        predictedWinner,
+        Math.max(prediction.homeWinProbability, prediction.awayWinProbability),
+        prediction.confidence
+      )
+      
+      // Update leaderboard
+      await AccuracyTracker.updateLeaderboard()
+      
+      toast.success(`🎯 Prediction complete! ${predictedWinner} favored with ${Math.max(prediction.homeWinProbability, prediction.awayWinProbability)}% probability`)
     } catch (error) {
       console.error('Error generating prediction:', error)
       toast.error('Failed to generate prediction. Please try again.')
@@ -135,17 +157,17 @@ function App() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary mb-2">NFL Game Predictor</h1>
           <p className="text-lg text-muted-foreground mb-1">
-            Advanced AI-powered predictions using real-time data from ESPN, Weather, Betting Odds & Injury APIs
+            Advanced AI-powered predictions with real-time accuracy tracking using ESPN, Weather, Betting Odds & Injury APIs
           </p>
           <p className="text-sm text-muted-foreground/80">
-            • Live team statistics • Injury analysis • Weather impact • Multi-sportsbook odds comparison • Home field advantage
+            • Live team statistics • Injury analysis • Weather impact • Multi-sportsbook odds • Weekly accuracy tracking • Performance leaderboards
           </p>
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm font-medium text-blue-800">
               🏈 Currently predicting: {currentWeek < 0 ? `Preseason Week ${Math.abs(currentWeek)}` : `Week ${currentWeek}`} games only
             </p>
             <p className="text-xs text-blue-600 mt-1">
-              Focus on current week for maximum accuracy with real-time data
+              Focus on current week for maximum accuracy with real-time data • Track performance with weekly leaderboards
             </p>
           </div>
         </div>
@@ -156,6 +178,9 @@ function App() {
             <CardTitle className="flex items-center gap-2">
               <Activity className="text-primary" />
               Live NFL Data & Current Week Predictions
+              <Badge variant="secondary" className="ml-auto">
+                Accuracy Tracking Enabled
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -176,8 +201,8 @@ function App() {
               <Info className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
                 {selectedGame?.isPreseason 
-                  ? '🎯 Real-time prediction using: ESPN team stats, injury reports, weather data, betting odds & market analysis!'
-                  : '🎯 Live prediction using: Current team performance, injury status, weather conditions, betting market insights & historical data!'
+                  ? '🎯 Real-time prediction with accuracy tracking using: ESPN team stats, injury reports, weather data, betting odds & market analysis!'
+                  : '🎯 Live prediction with performance tracking using: Current team performance, injury status, weather conditions, betting market insights & historical data!'
                 }
               </AlertDescription>
             </Alert>
@@ -193,7 +218,7 @@ function App() {
             </div>
 
             <Tabs defaultValue="prediction" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-8">
+              <TabsList className="grid w-full grid-cols-10">
                 <TabsTrigger value="prediction" className="flex items-center gap-2">
                   <Target size={16} />
                   Prediction
@@ -221,6 +246,14 @@ function App() {
                 <TabsTrigger value="sources" className="flex items-center gap-2">
                   <Database size={16} />
                   Data Sources
+                </TabsTrigger>
+                <TabsTrigger value="accuracy" className="flex items-center gap-2">
+                  <Trophy size={16} />
+                  Accuracy
+                </TabsTrigger>
+                <TabsTrigger value="results" className="flex items-center gap-2">
+                  <RefreshCw size={16} />
+                  Results
                 </TabsTrigger>
                 <TabsTrigger value="history" className="flex items-center gap-2">
                   <Clock size={16} />
@@ -280,6 +313,14 @@ function App() {
 
               <TabsContent value="sources">
                 <DataSources />
+              </TabsContent>
+
+              <TabsContent value="accuracy">
+                <AccuracyDashboard />
+              </TabsContent>
+
+              <TabsContent value="results">
+                <GameResultTracker />
               </TabsContent>
 
               <TabsContent value="history">

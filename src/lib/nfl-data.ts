@@ -819,6 +819,13 @@ export const getCurrentWeek = (): number => {
   return -2
 }
 
+export const getCurrentSeason = (): number => {
+  const now = new Date()
+  const year = now.getFullYear()
+  // NFL season starts in September, so if it's before March, it's still the previous season
+  return now.getMonth() < 3 ? year - 1 : year
+}
+
 export const getGamesForWeek = async (week: number): Promise<NFLGame[]> => {
   try {
     console.log(`🔍 Fetching games for week ${week}...`)
