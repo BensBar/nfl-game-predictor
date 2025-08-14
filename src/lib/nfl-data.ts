@@ -1,5 +1,6 @@
 import { NFLTeam, TeamStats, GameResult, NFLGame, PredictionFactor } from '@/types/nfl'
 import { realSportsAPI } from './real-sports-api'
+import { getBettingOddsComparison, getBettingFactors } from './betting-api'
 
 export const NFL_TEAMS: NFLTeam[] = [
   // AFC East
@@ -80,6 +81,16 @@ export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) 
   let homeScore = 50 // Start with equal baseline
   let awayScore = 50
   const factors: PredictionFactor[] = []
+  
+  // Get betting market insights
+  let bettingFactors: string[] = []
+  try {
+    const bettingData = await getBettingOddsComparison(`${awayTeam.abbreviation}@${homeTeam.abbreviation}`, homeTeam.abbreviation, awayTeam.abbreviation)
+    bettingFactors = getBettingFactors(bettingData)
+    console.log(`💰 Retrieved betting data with ${bettingFactors.length} market insights`)
+  } catch (error) {
+    console.warn('Betting data not available:', error)
+  }
   
   // === OFFENSE vs DEFENSE MATCHUP ===
   const homeOffensePower = homeStats.pointsPerGame + (homeStats.totalYards / 25)
@@ -218,6 +229,16 @@ export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) 
     }
   }
   
+  // === BETTING MARKET INSIGHTS ===
+  // Add betting market factors to prediction analysis
+  bettingFactors.forEach(factor => {
+    factors.push({
+      text: factor,
+      source: 'Odds',
+      sourceUrl: 'https://sportsbook.draftkings.com'
+    })
+  })
+  
   // Ensure scores stay positive
   homeScore = Math.max(homeScore, 15)
   awayScore = Math.max(awayScore, 15)
@@ -237,7 +258,7 @@ export const calculatePrediction = async (homeTeam: NFLTeam, awayTeam: NFLTeam) 
     homeWinProbability,
     awayWinProbability,
     confidence,
-    factors: factors.slice(0, 6)
+    factors: factors.slice(0, 8) // Include betting insights
   }
 }
 

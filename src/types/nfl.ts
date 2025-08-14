@@ -26,7 +26,7 @@ export interface GameResult {
 
 export interface PredictionFactor {
   text: string
-  source: 'ESPN' | 'Weather' | 'Injuries' | 'Betting' | 'Historical' | 'Home Field'
+  source: 'ESPN' | 'Weather' | 'Injuries' | 'Betting' | 'Historical' | 'Home Field' | 'Odds'
   sourceUrl?: string
 }
 
@@ -94,4 +94,49 @@ export interface PositionImpact {
   currentInjuries: PlayerInjury[]
   depthQuality: 'Excellent' | 'Good' | 'Average' | 'Poor' | 'Critical'
   overallImpact: number
+}
+
+export interface BettingOdds {
+  sportsbook: string
+  homeSpread: number
+  awaySpread: number
+  homeSpreadOdds: number
+  awaySpreadOdds: number
+  homeMoneyline: number
+  awayMoneyline: number
+  overUnder: number
+  overOdds: number
+  underOdds: number
+  lastUpdated: string
+}
+
+export interface BettingComparison {
+  gameId: string
+  homeTeam: string
+  awayTeam: string
+  bestHomeSpread: BettingOdds
+  bestAwaySpread: BettingOdds
+  bestHomeMoneyline: BettingOdds
+  bestAwayMoneyline: BettingOdds
+  bestOver: BettingOdds
+  bestUnder: BettingOdds
+  averageSpread: number
+  averageTotal: number
+  oddsMovement: OddsMovement[]
+  consensus: {
+    homeSpreadPercent: number
+    awaySpreadPercent: number
+    overPercent: number
+    underPercent: number
+  }
+}
+
+export interface OddsMovement {
+  sportsbook: string
+  timestamp: string
+  homeSpread: number
+  awaySpread: number
+  homeMoneyline: number
+  awayMoneyline: number
+  overUnder: number
 }

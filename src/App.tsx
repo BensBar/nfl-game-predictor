@@ -16,7 +16,8 @@ import { DataSources } from '@/components/DataSources'
 import { LiveDataDashboard } from '@/components/LiveDataDashboard'
 import { DataInsights } from '@/components/DataInsights'
 import { InjuryAnalysis } from '@/components/InjuryAnalysis'
-import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp, Heart } from '@phosphor-icons/react'
+import { BettingOddsComparison } from '@/components/BettingOddsComparison'
+import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp, Heart, DollarSign } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 function App() {
@@ -138,10 +139,10 @@ function App() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-primary mb-2">NFL Game Predictor</h1>
           <p className="text-lg text-muted-foreground mb-1">
-            Advanced AI-powered predictions using real-time data from ESPN, Weather & Odds APIs
+            Advanced AI-powered predictions using real-time data from ESPN, Weather, Betting Odds & Injury APIs
           </p>
           <p className="text-sm text-muted-foreground/80">
-            • Live team statistics • Injury analysis • Weather impact • Home field advantage
+            • Live team statistics • Injury analysis • Weather impact • Multi-sportsbook odds comparison • Home field advantage
           </p>
         </div>
 
@@ -240,8 +241,8 @@ function App() {
               <Info className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-800">
                 {selectedGame?.isPreseason 
-                  ? '🎯 Real-time prediction using: ESPN team stats, injury reports, weather data & betting odds analysis!'
-                  : '🎯 Live prediction using: Current team performance, injury status, weather conditions & historical data!'
+                  ? '🎯 Real-time prediction using: ESPN team stats, injury reports, weather data, betting odds & market analysis!'
+                  : '🎯 Live prediction using: Current team performance, injury status, weather conditions, betting market insights & historical data!'
                 }
               </AlertDescription>
             </Alert>
@@ -257,10 +258,14 @@ function App() {
             </div>
 
             <Tabs defaultValue="prediction" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="prediction" className="flex items-center gap-2">
                   <Target size={16} />
                   Prediction
+                </TabsTrigger>
+                <TabsTrigger value="betting" className="flex items-center gap-2">
+                  <DollarSign size={16} />
+                  Betting Odds
                 </TabsTrigger>
                 <TabsTrigger value="injuries" className="flex items-center gap-2">
                   <Heart size={16} />
@@ -296,6 +301,14 @@ function App() {
                   awayWinProbability={currentPrediction.awayWinProbability}
                   confidence={currentPrediction.confidence}
                   factors={currentPrediction.factors}
+                />
+              </TabsContent>
+
+              <TabsContent value="betting">
+                <BettingOddsComparison
+                  homeTeam={selectedGame.homeTeam}
+                  awayTeam={selectedGame.awayTeam}
+                  gameId={selectedGame.id}
                 />
               </TabsContent>
 

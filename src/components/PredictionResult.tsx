@@ -36,6 +36,8 @@ export function PredictionResult({
         return <FirstAid size={14} className="text-red-600" />
       case 'Betting':
         return <ChartLine size={14} className="text-green-600" />
+      case 'Odds':
+        return <ChartLine size={14} className="text-yellow-600" />
       case 'Historical':
         return <TrendingUp size={14} className="text-purple-600" />
       case 'Home Field':
@@ -55,6 +57,8 @@ export function PredictionResult({
         return 'https://www.espn.com/nfl/injuries'
       case 'Betting':
         return 'https://www.espn.com/nfl/lines'
+      case 'Odds':
+        return 'https://sportsbook.draftkings.com'
       case 'Historical':
         return 'https://www.pro-football-reference.com'
       case 'Home Field':
@@ -162,6 +166,10 @@ export function PredictionResult({
             <div className="flex items-center gap-1">
               <ChartLine size={12} className="text-green-600" />
               <span>Betting</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <ChartLine size={12} className="text-yellow-600" />
+              <span>Odds</span>
             </div>
             <div className="flex items-center gap-1">
               <House size={12} className="text-orange-600" />
