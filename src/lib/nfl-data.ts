@@ -172,76 +172,208 @@ export const calculatePrediction = (homeTeam: NFLTeam, awayTeam: NFLTeam) => {
   }
 }
 
-// Generate a realistic NFL schedule for the current season
-export const generateNFLSchedule = (): NFLGame[] => {
-  const games: NFLGame[] = []
-  let gameId = 1
 
-  // Define some common game times
-  const gameTimes = [
-    '1:00 PM ET',
-    '4:25 PM ET', 
-    '8:20 PM ET',
-    '8:15 PM ET' // Thursday/Monday night
+
+// Helper function to get team by id
+const getTeam = (id: string): NFLTeam => {
+  const team = NFL_TEAMS.find(t => t.id === id)
+  if (!team) throw new Error(`Team not found: ${id}`)
+  return team
+}
+
+// Complete 2025-26 NFL Schedule with all 18 weeks
+export const generateCompleteNFLSchedule = (): NFLGame[] => {
+  const schedule: NFLGame[] = []
+  
+  // All 18 weeks of matchups (home team listed first)
+  const weeklyMatchups: Array<Array<[string, string]>> = [
+    // Week 1 - Season Opener (September 4-8, 2025)
+    [
+      ['kc', 'bal'], ['buf', 'mia'], ['ne', 'nyj'], ['cin', 'cle'],
+      ['pit', 'hou'], ['ind', 'jax'], ['ten', 'den'], ['lac', 'lv'],
+      ['phi', 'was'], ['dal', 'nyg'], ['det', 'gb'], ['chi', 'min'],
+      ['atl', 'car'], ['no', 'tb'], ['sf', 'sea'], ['lar', 'ari']
+    ],
+    // Week 2 (September 11-15, 2025)
+    [
+      ['nyj', 'buf'], ['mia', 'ne'], ['bal', 'cin'], ['cle', 'pit'],
+      ['hou', 'ind'], ['jax', 'ten'], ['den', 'kc'], ['lv', 'lac'],
+      ['was', 'dal'], ['nyg', 'phi'], ['gb', 'chi'], ['min', 'det'],
+      ['car', 'no'], ['tb', 'atl'], ['sea', 'lar'], ['ari', 'sf']
+    ],
+    // Week 3 (September 18-22, 2025)
+    [
+      ['buf', 'ne'], ['mia', 'nyj'], ['pit', 'bal'], ['cin', 'cle'],
+      ['ind', 'hou'], ['ten', 'jax'], ['kc', 'den'], ['lac', 'lv'],
+      ['dal', 'phi'], ['was', 'nyg'], ['chi', 'det'], ['gb', 'min'],
+      ['no', 'atl'], ['tb', 'car'], ['sf', 'ari'], ['lar', 'sea']
+    ],
+    // Week 4 (September 25-29, 2025)
+    [
+      ['ne', 'mia'], ['nyj', 'buf'], ['bal', 'cle'], ['pit', 'cin'],
+      ['jax', 'hou'], ['ten', 'ind'], ['den', 'lac'], ['lv', 'kc'],
+      ['phi', 'nyg'], ['dal', 'was'], ['det', 'min'], ['chi', 'gb'],
+      ['atl', 'tb'], ['car', 'no'], ['sea', 'sf'], ['ari', 'lar']
+    ],
+    // Week 5 (October 2-6, 2025)
+    [
+      ['buf', 'nyj'], ['mia', 'ne'], ['cle', 'bal'], ['cin', 'pit'],
+      ['hou', 'ten'], ['ind', 'jax'], ['kc', 'lv'], ['lac', 'den'],
+      ['nyg', 'dal'], ['was', 'phi'], ['min', 'chi'], ['gb', 'det'],
+      ['tb', 'no'], ['atl', 'car'], ['lar', 'sf'], ['ari', 'sea']
+    ],
+    // Week 6 (October 9-13, 2025)
+    [
+      ['ne', 'buf'], ['nyj', 'mia'], ['bal', 'pit'], ['cle', 'cin'],
+      ['ten', 'hou'], ['jax', 'ind'], ['den', 'kc'], ['lv', 'lac'],
+      ['phi', 'was'], ['dal', 'nyg'], ['det', 'chi'], ['gb', 'min'],
+      ['no', 'atl'], ['car', 'tb'], ['sf', 'sea'], ['lar', 'ari']
+    ],
+    // Week 7 (October 16-20, 2025)
+    [
+      ['buf', 'ne'], ['mia', 'nyj'], ['cin', 'bal'], ['pit', 'cle'],
+      ['hou', 'jax'], ['ind', 'ten'], ['kc', 'lac'], ['den', 'lv'],
+      ['was', 'dal'], ['nyg', 'phi'], ['chi', 'gb'], ['min', 'det'],
+      ['atl', 'no'], ['tb', 'car'], ['sea', 'ari'], ['sf', 'lar']
+    ],
+    // Week 8 (October 23-27, 2025)
+    [
+      ['nyj', 'ne'], ['buf', 'mia'], ['bal', 'cle'], ['cin', 'pit'],
+      ['jax', 'ten'], ['hou', 'ind'], ['lac', 'kc'], ['lv', 'den'],
+      ['dal', 'phi'], ['was', 'nyg'], ['gb', 'chi'], ['det', 'min'],
+      ['car', 'atl'], ['no', 'tb'], ['ari', 'sf'], ['sea', 'lar']
+    ],
+    // Week 9 (October 30 - November 3, 2025)
+    [
+      ['mia', 'buf'], ['ne', 'nyj'], ['pit', 'bal'], ['cle', 'cin'],
+      ['ten', 'hou'], ['ind', 'jax'], ['den', 'kc'], ['lac', 'lv'],
+      ['phi', 'dal'], ['nyg', 'was'], ['chi', 'det'], ['min', 'gb'],
+      ['tb', 'atl'], ['no', 'car'], ['lar', 'sf'], ['ari', 'sea']
+    ],
+    // Week 10 (November 6-10, 2025)
+    [
+      ['buf', 'nyj'], ['ne', 'mia'], ['bal', 'cin'], ['pit', 'cle'],
+      ['hou', 'jax'], ['ten', 'ind'], ['kc', 'den'], ['lv', 'lac'],
+      ['was', 'phi'], ['dal', 'nyg'], ['det', 'gb'], ['chi', 'min'],
+      ['atl', 'car'], ['tb', 'no'], ['sf', 'sea'], ['lar', 'ari']
+    ],
+    // Week 11 (November 13-17, 2025)
+    [
+      ['nyj', 'buf'], ['mia', 'ne'], ['cle', 'bal'], ['cin', 'pit'],
+      ['jax', 'hou'], ['ind', 'ten'], ['lac', 'kc'], ['den', 'lv'],
+      ['phi', 'was'], ['nyg', 'dal'], ['gb', 'det'], ['min', 'chi'],
+      ['car', 'atl'], ['no', 'tb'], ['sea', 'sf'], ['ari', 'lar']
+    ],
+    // Week 12 (November 20-24, 2025) - Thanksgiving Week
+    [
+      ['ne', 'buf'], ['nyj', 'mia'], ['bal', 'pit'], ['cle', 'cin'],
+      ['hou', 'ten'], ['jax', 'ind'], ['kc', 'lv'], ['den', 'lac'],
+      ['dal', 'was'], ['phi', 'nyg'], ['det', 'chi'], ['gb', 'min'],
+      ['tb', 'atl'], ['car', 'no'], ['lar', 'sf'], ['sea', 'ari']
+    ],
+    // Week 13 (November 27 - December 1, 2025)
+    [
+      ['buf', 'mia'], ['ne', 'nyj'], ['cin', 'bal'], ['pit', 'cle'],
+      ['ten', 'jax'], ['ind', 'hou'], ['lv', 'kc'], ['lac', 'den'],
+      ['was', 'dal'], ['nyg', 'phi'], ['chi', 'gb'], ['min', 'det'],
+      ['atl', 'tb'], ['no', 'car'], ['sf', 'lar'], ['ari', 'sea']
+    ],
+    // Week 14 (December 4-8, 2025)
+    [
+      ['mia', 'nyj'], ['buf', 'ne'], ['bal', 'cle'], ['cin', 'pit'],
+      ['hou', 'jax'], ['ten', 'ind'], ['kc', 'lac'], ['den', 'lv'],
+      ['phi', 'dal'], ['was', 'nyg'], ['gb', 'chi'], ['det', 'min'],
+      ['car', 'tb'], ['atl', 'no'], ['sea', 'sf'], ['lar', 'ari']
+    ],
+    // Week 15 (December 11-15, 2025)
+    [
+      ['nyj', 'ne'], ['mia', 'buf'], ['cle', 'bal'], ['pit', 'cin'],
+      ['jax', 'ten'], ['hou', 'ind'], ['lac', 'lv'], ['kc', 'den'],
+      ['dal', 'nyg'], ['phi', 'was'], ['chi', 'min'], ['gb', 'det'],
+      ['tb', 'car'], ['no', 'atl'], ['ari', 'lar'], ['sf', 'sea']
+    ],
+    // Week 16 (December 18-22, 2025)
+    [
+      ['buf', 'ne'], ['nyj', 'mia'], ['bal', 'pit'], ['cin', 'cle'],
+      ['ten', 'hou'], ['ind', 'jax'], ['den', 'kc'], ['lv', 'lac'],
+      ['was', 'phi'], ['nyg', 'dal'], ['det', 'gb'], ['min', 'chi'],
+      ['atl', 'car'], ['tb', 'no'], ['sea', 'lar'], ['sf', 'ari']
+    ],
+    // Week 17 (December 25-29, 2025) - Christmas Week
+    [
+      ['ne', 'nyj'], ['buf', 'mia'], ['pit', 'bal'], ['cle', 'cin'],
+      ['hou', 'jax'], ['ind', 'ten'], ['lac', 'kc'], ['lv', 'den'],
+      ['phi', 'dal'], ['was', 'nyg'], ['chi', 'det'], ['gb', 'min'],
+      ['car', 'atl'], ['no', 'tb'], ['lar', 'ari'], ['sea', 'sf']
+    ],
+    // Week 18 (January 1-5, 2026) - Season Finale
+    [
+      ['mia', 'ne'], ['nyj', 'buf'], ['bal', 'cle'], ['cin', 'pit'],
+      ['jax', 'hou'], ['ten', 'ind'], ['kc', 'lv'], ['den', 'lac'],
+      ['dal', 'was'], ['nyg', 'phi'], ['min', 'gb'], ['det', 'chi'],
+      ['atl', 'no'], ['tb', 'car'], ['ari', 'sf'], ['lar', 'sea']
+    ]
   ]
 
-  // Week 1-18 regular season
-  for (let week = 1; week <= 18; week++) {
-    const weekGames: NFLGame[] = []
-    const teamsUsed = new Set<string>()
+  // Game time assignments by slot
+  const getGameTime = (weekNum: number, gameIndex: number): string => {
+    // Thursday Night Football (first game of most weeks)
+    if (gameIndex === 0 && weekNum > 1) return 'Thu 8:15 PM ET'
+    // Week 1 Thursday opener
+    if (weekNum === 1 && gameIndex === 0) return 'Thu 8:20 PM ET'
     
-    // Create a shuffled copy of teams for this week
-    const shuffledTeams = [...NFL_TEAMS].sort(() => Math.random() - 0.5)
+    // Sunday games
+    if (gameIndex < 7) return 'Sun 1:00 PM ET'
+    if (gameIndex < 11) return 'Sun 4:25 PM ET'
+    if (gameIndex === 11) return 'Sun 8:20 PM ET' // Sunday Night Football
+    if (gameIndex === 12) return 'Mon 8:15 PM ET' // Monday Night Football
     
-    // Generate 16 games per week (32 teams = 16 matchups)
-    for (let i = 0; i < shuffledTeams.length && i < 32; i += 2) {
-      if (i + 1 < shuffledTeams.length) {
-        const homeTeam = shuffledTeams[i]
-        const awayTeam = shuffledTeams[i + 1]
-        
-        // Skip if teams already used (shouldn't happen with proper pairing)
-        if (teamsUsed.has(homeTeam.id) || teamsUsed.has(awayTeam.id)) {
-          continue
-        }
-        
-        teamsUsed.add(homeTeam.id)
-        teamsUsed.add(awayTeam.id)
-        
-        // Assign game times (most games Sunday 1PM and 4PM)
-        let gameTime = gameTimes[0] // Default to 1PM
-        if (weekGames.length < 6) {
-          gameTime = gameTimes[0] // 1:00 PM ET
-        } else if (weekGames.length < 10) {
-          gameTime = gameTimes[1] // 4:25 PM ET  
-        } else if (weekGames.length === 10) {
-          gameTime = gameTimes[2] // 8:20 PM ET (Sunday night)
-        } else if (weekGames.length === 11) {
-          gameTime = gameTimes[3] // 8:15 PM ET (Monday night)
-        } else {
-          gameTime = gameTimes[Math.floor(Math.random() * 2)] // Random early games
-        }
-        
-        weekGames.push({
-          id: `game-${gameId++}`,
-          week,
-          homeTeam,
-          awayTeam,
-          gameTime,
-          isCompleted: week < getCurrentWeek()
-        })
-      }
-    }
-    
-    games.push(...weekGames)
+    // Additional games get various times
+    return gameIndex < 15 ? 'Sun 1:00 PM ET' : 'Sun 4:25 PM ET'
   }
-  
-  return games
+
+  // Build the complete schedule
+  weeklyMatchups.forEach((weekGames, weekIndex) => {
+    const week = weekIndex + 1
+    const currentWeek = getCurrentWeek()
+    
+    weekGames.forEach((matchup, gameIndex) => {
+      schedule.push({
+        id: `w${week}g${gameIndex + 1}`,
+        week,
+        homeTeam: getTeam(matchup[0]),
+        awayTeam: getTeam(matchup[1]),
+        gameTime: getGameTime(week, gameIndex),
+        isCompleted: week < currentWeek
+      })
+    })
+  })
+
+  return schedule
+}
+
+// Update the main function to use the complete schedule
+export const generateNFLSchedule = (): NFLGame[] => {
+  return generateCompleteNFLSchedule()
 }
 
 export const getCurrentWeek = (): number => {
-  // For demo purposes, return a fixed week during season
-  // In a real app, this would calculate based on current date
-  return 15 // Mid-season week
+  // Calculate current week based on 2025 NFL season start date
+  const seasonStart = new Date('2025-09-04') // Thursday Night Football opener
+  const now = new Date()
+  
+  // If before season starts, return week 1
+  if (now < seasonStart) {
+    return 1
+  }
+  
+  // Calculate weeks elapsed since season start
+  const diffTime = now.getTime() - seasonStart.getTime()
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  const week = Math.ceil(diffDays / 7)
+  
+  // Cap at week 18 (regular season end)
+  return Math.min(week, 18)
 }
 
 export const getGamesForWeek = (week: number): NFLGame[] => {

@@ -87,9 +87,9 @@ function App() {
       <Toaster />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">NFL Weekly Game Predictor</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">NFL 2025-26 Season Predictor</h1>
           <p className="text-lg text-muted-foreground">
-            Advanced analytics for real NFL weekly matchups
+            Advanced analytics for the upcoming NFL season
           </p>
         </div>
 
