@@ -744,39 +744,16 @@ export const generateNFLSchedule = async (): Promise<NFLGame[]> => {
 export const getCurrentWeek = (): number => {
   // Return preseason week 2 (-2) for testing with tonight's games
   return -2
-  
-  // For production, use the actual date calculation:
-  /*
-  // Calculate current week based on 2025 NFL season start date
-  const seasonStart = new Date('2025-09-04') // Thursday Night Football opener
-  const preseasonStart = new Date('2025-08-08') // Start of preseason week 1
-  const now = new Date()
-  
-  // If before preseason starts, return preseason week 1
-  if (now < preseasonStart) {
-    return -3
-  }
-  
-  // If in preseason period
-  if (now < seasonStart) {
-    const diffTime = now.getTime() - preseasonStart.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    const preseasonWeek = Math.ceil(diffDays / 7)
-    return -4 + preseasonWeek // Returns -3, -2, or -1
-  }
-  
-  // If in regular season
-  // Calculate weeks elapsed since season start
-  const diffTime = now.getTime() - seasonStart.getTime()
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  const week = Math.ceil(diffDays / 7)
-  
-  // Cap at week 18 (regular season end)
-  return Math.min(week, 18)
-  */
 }
 
 export const getGamesForWeek = async (week: number): Promise<NFLGame[]> => {
-  // Use real API to get games instead of fake data
-  return await realSportsAPI.fetchSchedule(week)
+  try {
+    console.log(`🔍 Fetching games for week ${week}...`)
+    const games = await realSportsAPI.fetchSchedule(week)
+    console.log(`✅ Retrieved ${games?.length || 0} games for week ${week}`)
+    return games || []
+  } catch (error) {
+    console.error(`❌ Error fetching games for week ${week}:`, error)
+    return []
+  }
 }

@@ -29,8 +29,10 @@ function App() {
   useEffect(() => {
     const loadGames = async () => {
       try {
+        console.log(`Loading games for week ${selectedWeek}...`)
         const games = await getGamesForWeek(selectedWeek)
-        setWeekGames(games || [])
+        console.log(`Loaded ${games?.length || 0} games for week ${selectedWeek}`)
+        setWeekGames(Array.isArray(games) ? games : [])
         setSelectedGame(null)
         setCurrentPrediction(null)
       } catch (error) {
@@ -38,7 +40,7 @@ function App() {
         setWeekGames([])
         setSelectedGame(null)
         setCurrentPrediction(null)
-        toast.error('Error loading games for the selected week')
+        toast.error(`Error loading games for week ${selectedWeek < 0 ? `Preseason ${Math.abs(selectedWeek)}` : selectedWeek}`)
       }
     }
     
@@ -206,6 +208,28 @@ function App() {
               >
                 {isGeneratingPrediction ? 'Analyzing Teams...' : 'Generate Prediction'}
               </Button>
+            </div>
+            
+            {/* Debug info */}
+            <div className="mt-4 space-y-2">
+              {weekGames && weekGames.length === 0 && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                  <strong>Debug:</strong> No games found for week {selectedWeek < 0 ? `Preseason ${Math.abs(selectedWeek)}` : selectedWeek}
+                </div>
+              )}
+              
+              {weekGames && weekGames.length > 0 && !selectedGame && (
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
+                  <strong>Ready:</strong> {weekGames.length} games available for week {selectedWeek < 0 ? `Preseason ${Math.abs(selectedWeek)}` : selectedWeek}. Select one to generate predictions.
+                </div>
+              )}
+              
+              {selectedGame && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
+                  <strong>Selected:</strong> {selectedGame.awayTeam.city} @ {selectedGame.homeTeam.city} ({selectedGame.gameTime})
+                  {selectedGame.isPreseason && ' - Preseason Game'}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

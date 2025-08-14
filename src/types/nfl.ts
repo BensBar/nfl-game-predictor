@@ -47,6 +47,7 @@ export interface NFLGame {
   gameTime: string
   isCompleted?: boolean
   isPreseason?: boolean
+  isLive?: boolean
   homeScore?: number
   awayScore?: number
 }

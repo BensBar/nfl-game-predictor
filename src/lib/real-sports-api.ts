@@ -134,21 +134,23 @@ export class RealSportsAPI {
     if (cached) return cached
 
     try {
+      console.log(`🔍 API: Fetching schedule for week ${week}...`)
       let games: NFLGame[] = []
       
       if (week < 0) {
-        // Preseason games
-        games = await this.fetchPreseasonGames(week)
+        // Preseason games - use our built-in data
+        games = await this.getBuiltInPreseasonGames(week)
       } else {
-        // Regular season games
-        games = await this.fetchRegularSeasonGames(week)
+        // Regular season games - use our built-in data for now
+        games = await this.getBuiltInRegularSeasonGames(week)
       }
       
+      console.log(`✅ API: Found ${games.length} games for week ${week}`)
       this.cache.set(cacheKey, games, 60) // Cache for 1 hour
       return games
     } catch (error) {
-      console.error(`Error fetching schedule for week ${week}:`, error)
-      return this.getFallbackSchedule(week)
+      console.error(`❌ API: Error fetching schedule for week ${week}:`, error)
+      return []
     }
   }
 
@@ -311,30 +313,105 @@ export class RealSportsAPI {
     return this.generateRealisticStats(teamId)
   }
 
-  private async fetchPreseasonGames(week: number): Promise<NFLGame[]> {
-    // For preseason, use our curated schedule data
-    return this.getFallbackSchedule(week)
+  private async getBuiltInPreseasonGames(week: number): Promise<NFLGame[]> {
+    // Built-in preseason schedule to avoid circular imports
+    const preseasonSchedule = {
+      [-3]: [ // Preseason Week 1
+        { away: 'ind', home: 'bal', time: 'Thu 7:00 PM ET' },
+        { away: 'cin', home: 'phi', time: 'Thu 7:30 PM ET' },
+        { away: 'lv', home: 'sea', time: 'Thu 10:00 PM ET' },
+        { away: 'det', home: 'atl', time: 'Fri 7:00 PM ET' },
+        { away: 'cle', home: 'car', time: 'Fri 7:00 PM ET' },
+        { away: 'wsh', home: 'ne', time: 'Fri 7:30 PM ET' },
+        { away: 'nyg', home: 'buf', time: 'Sat 1:00 PM ET' },
+        { away: 'hou', home: 'min', time: 'Sat 4:00 PM ET' },
+        { away: 'pit', home: 'jax', time: 'Sat 7:00 PM ET' },
+        { away: 'dal', home: 'lar', time: 'Sat 7:00 PM ET' },
+        { away: 'ten', home: 'tb', time: 'Sat 7:30 PM ET' },
+        { away: 'kc', home: 'ari', time: 'Sat 8:00 PM ET' },
+        { away: 'nyj', home: 'gb', time: 'Sat 8:00 PM ET' },
+        { away: 'den', home: 'sf', time: 'Sat 8:30 PM ET' },
+        { away: 'mia', home: 'chi', time: 'Sun 1:00 PM ET' },
+        { away: 'no', home: 'lac', time: 'Sun 4:05 PM ET' }
+      ],
+      [-2]: [ // Preseason Week 2 (CURRENT WEEK FOR TESTING)
+        { away: 'ten', home: 'atl', time: 'Fri 7:00 PM ET' },
+        { away: 'kc', home: 'sea', time: 'Fri 10:00 PM ET' },
+        { away: 'mia', home: 'det', time: 'Sat 1:00 PM ET' },
+        { away: 'car', home: 'hou', time: 'Sat 1:00 PM ET' },
+        { away: 'gb', home: 'ind', time: 'Sat 1:00 PM ET' },
+        { away: 'ne', home: 'min', time: 'Sat 1:00 PM ET' },
+        { away: 'cle', home: 'phi', time: 'Sat 1:00 PM ET' },
+        { away: 'sf', home: 'lv', time: 'Sat 4:00 PM ET' },
+        { away: 'bal', home: 'dal', time: 'Sat 7:00 PM ET' },
+        { away: 'lac', home: 'lar', time: 'Sat 7:00 PM ET' },
+        { away: 'nyj', home: 'nyg', time: 'Sat 7:00 PM ET' },
+        { away: 'tb', home: 'pit', time: 'Sat 7:00 PM ET' },
+        { away: 'ari', home: 'den', time: 'Sat 9:30 PM ET' },
+        { away: 'jax', home: 'no', time: 'Sun 1:00 PM ET' },
+        { away: 'buf', home: 'chi', time: 'Sun 8:00 PM ET' },
+        { away: 'cin', home: 'wsh', time: 'Mon 8:00 PM ET' }
+      ],
+      [-1]: [ // Preseason Week 3
+        { away: 'pit', home: 'car', time: 'Thu 7:00 PM ET' },
+        { away: 'ne', home: 'nyg', time: 'Thu 8:00 PM ET' },
+        { away: 'phi', home: 'nyj', time: 'Fri 7:30 PM ET' },
+        { away: 'atl', home: 'dal', time: 'Fri 8:00 PM ET' },
+        { away: 'min', home: 'ten', time: 'Fri 8:00 PM ET' },
+        { away: 'chi', home: 'kc', time: 'Fri 8:20 PM ET' },
+        { away: 'bal', home: 'wsh', time: 'Sat 12:00 PM ET' },
+        { away: 'ind', home: 'cin', time: 'Sat 1:00 PM ET' },
+        { away: 'lar', home: 'cle', time: 'Sat 1:00 PM ET' },
+        { away: 'hou', home: 'det', time: 'Sat 1:00 PM ET' },
+        { away: 'den', home: 'no', time: 'Sat 1:00 PM ET' },
+        { away: 'sea', home: 'gb', time: 'Sat 4:00 PM ET' },
+        { away: 'jax', home: 'mia', time: 'Sat 7:00 PM ET' },
+        { away: 'buf', home: 'tb', time: 'Sat 7:30 PM ET' },
+        { away: 'lac', home: 'sf', time: 'Sat 8:30 PM ET' },
+        { away: 'lv', home: 'ari', time: 'Sat 10:00 PM ET' }
+      ]
+    }
+
+    const weekGames = preseasonSchedule[week as keyof typeof preseasonSchedule] || []
+    
+    return weekGames.map((gameData, index) => {
+      const gameId = `ps${Math.abs(week)}g${index + 1}`
+      const homeTeam = this.getTeamById(gameData.home)
+      const awayTeam = this.getTeamById(gameData.away)
+      
+      return {
+        id: gameId,
+        week,
+        homeTeam,
+        awayTeam,
+        gameTime: gameData.time,
+        isCompleted: false,
+        isPreseason: true
+      }
+    }).filter(game => game.homeTeam && game.awayTeam)
   }
 
-  private async fetchRegularSeasonGames(week: number): Promise<NFLGame[]> {
-    // Try to fetch from ESPN API first
-    try {
-      if (!this.rateLimiter.canMakeRequest('espn-schedule')) {
-        return this.getFallbackSchedule(week)
-      }
+  private async getBuiltInRegularSeasonGames(week: number): Promise<NFLGame[]> {
+    // For now, return empty for regular season (we can add this later)
+    // This would contain the full 18-week regular season schedule
+    return []
+  }
 
-      this.rateLimiter.recordRequest('espn-schedule')
-      
-      // In production, construct the proper ESPN API URL for the specific week
-      const response = await fetch(`${API_ENDPOINTS.ESPN_NFL_SCHEDULE}&week=${week}`)
-      if (!response.ok) throw new Error(`ESPN API error: ${response.status}`)
-      
-      const data = await response.json()
-      return this.parseESPNGames(data)
-    } catch (error) {
-      console.error('Error fetching regular season games:', error)
-      return this.getFallbackSchedule(week)
+  private getTeamById(id: string): NFLTeam {
+    const team = NFL_TEAMS.find(t => t.id === id)
+    if (!team) {
+      console.warn(`Team not found: ${id}`)
+      // Return a fallback team to prevent crashes
+      return { 
+        id, 
+        name: 'Unknown', 
+        city: id.toUpperCase(), 
+        abbreviation: id.toUpperCase(), 
+        conference: 'AFC', 
+        division: 'East' 
+      }
     }
+    return team
   }
 
   private async getInjuriesFromAPI(teamId: string): Promise<any[]> {
@@ -405,14 +482,6 @@ export class RealSportsAPI {
     )
     
     return isGameTime ? [] : [] // Return empty unless real games are happening
-  }
-
-  private getFallbackSchedule(week: number): NFLGame[] {
-    // Use our curated schedule data as fallback
-    const { generateCompleteNFLSchedule } = require('./nfl-data')
-    return generateCompleteNFLSchedule().then((schedule: NFLGame[]) => 
-      schedule.filter(game => game.week === week)
-    )
   }
 
   private getFallbackTeamStats(teamId: string): TeamStats {
