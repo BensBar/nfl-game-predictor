@@ -22,10 +22,18 @@ function App() {
   const [predictions, setPredictions] = useKV<PredictionHistory[]>('prediction-history', [])
 
   useEffect(() => {
-    const games = getGamesForWeek(selectedWeek)
-    setWeekGames(games)
-    setSelectedGame(null)
-    setCurrentPrediction(null)
+    try {
+      const games = getGamesForWeek(selectedWeek)
+      setWeekGames(games || [])
+      setSelectedGame(null)
+      setCurrentPrediction(null)
+    } catch (error) {
+      console.error('Error loading games for week:', selectedWeek, error)
+      setWeekGames([])
+      setSelectedGame(null)
+      setCurrentPrediction(null)
+      toast.error('Error loading games for the selected week')
+    }
   }, [selectedWeek])
 
   const handleWeekChange = (week: string) => {
@@ -34,9 +42,15 @@ function App() {
   }
 
   const handleGameSelect = (gameId: string) => {
-    const game = weekGames.find(g => g.id === gameId)
-    setSelectedGame(game || null)
-    setCurrentPrediction(null)
+    try {
+      const game = Array.isArray(weekGames) ? weekGames.find(g => g.id === gameId) : null
+      setSelectedGame(game || null)
+      setCurrentPrediction(null)
+    } catch (error) {
+      console.error('Error selecting game:', gameId, error)
+      setSelectedGame(null)
+      setCurrentPrediction(null)
+    }
   }
 
   const handlePredict = () => {
@@ -70,8 +84,16 @@ function App() {
   const handleSavePrediction = () => {
     if (!currentPrediction) return
     
-    setPredictions((current) => [currentPrediction, ...current])
-    toast.success('Prediction saved to history!')
+    try {
+      setPredictions((current) => {
+        const currentArray = Array.isArray(current) ? current : []
+        return [currentPrediction, ...currentArray]
+      })
+      toast.success('Prediction saved to history!')
+    } catch (error) {
+      console.error('Error saving prediction:', error)
+      toast.error('Failed to save prediction')
+    }
   }
 
   const handleClearHistory = () => {
@@ -126,13 +148,13 @@ function App() {
                 <Select 
                   value={selectedGame?.id || ''} 
                   onValueChange={handleGameSelect}
-                  disabled={weekGames.length === 0}
+                  disabled={(weekGames?.length || 0) === 0}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a game" />
                   </SelectTrigger>
                   <SelectContent>
-                    {weekGames.map((game) => (
+                    {(weekGames || []).map((game) => (
                       <SelectItem key={game.id} value={game.id}>
                         {game.awayTeam.city} @ {game.homeTeam.city} ({game.gameTime})
                         {game.isCompleted && ' - Completed'}
@@ -209,7 +231,7 @@ function App() {
               <TabsContent value="schedule">
                 <WeeklySchedule 
                   week={selectedWeek}
-                  games={weekGames}
+                  games={Array.isArray(weekGames) ? weekGames : []}
                   selectedGame={selectedGame}
                   onGameSelect={handleGameSelect}
                 />
@@ -217,7 +239,7 @@ function App() {
 
               <TabsContent value="history">
                 <PredictionHistoryComponent
-                  predictions={predictions}
+                  predictions={Array.isArray(predictions) ? predictions : []}
                   onClearHistory={handleClearHistory}
                 />
               </TabsContent>
@@ -227,7 +249,7 @@ function App() {
 
         {!currentPrediction && (
           <div className="space-y-8">
-            {weekGames.length > 0 && (
+            {Array.isArray(weekGames) && weekGames.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle>Week {selectedWeek} Games</CardTitle>
@@ -235,7 +257,7 @@ function App() {
                 <CardContent>
                   <WeeklySchedule 
                     week={selectedWeek}
-                    games={weekGames}
+                    games={Array.isArray(weekGames) ? weekGames : []}
                     selectedGame={selectedGame}
                     onGameSelect={handleGameSelect}
                   />

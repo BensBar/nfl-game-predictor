@@ -14,7 +14,9 @@ export function PredictionHistoryComponent({
   predictions, 
   onClearHistory 
 }: PredictionHistoryProps) {
-  if (predictions.length === 0) {
+  const safePredictions = Array.isArray(predictions) ? predictions : []
+  
+  if (safePredictions.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -34,13 +36,13 @@ export function PredictionHistoryComponent({
     )
   }
 
-  const correctPredictions = predictions.filter(p => {
+  const correctPredictions = safePredictions.filter(p => {
     if (!p.actualResult) return false
     return (p.homeWinProbability > 50 && p.actualResult === 'home') ||
            (p.awayWinProbability > 50 && p.actualResult === 'away')
   }).length
 
-  const totalWithResults = predictions.filter(p => p.actualResult).length
+  const totalWithResults = safePredictions.filter(p => p.actualResult).length
   const accuracy = totalWithResults > 0 ? Math.round((correctPredictions / totalWithResults) * 100) : 0
 
   return (
@@ -71,7 +73,7 @@ export function PredictionHistoryComponent({
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {predictions.map((prediction) => {
+          {safePredictions.map((prediction) => {
             const favoredTeam = prediction.homeWinProbability > prediction.awayWinProbability 
               ? prediction.homeTeam 
               : prediction.awayTeam

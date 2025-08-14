@@ -176,8 +176,36 @@ export const calculatePrediction = (homeTeam: NFLTeam, awayTeam: NFLTeam) => {
 
 // Helper function to get team by id
 const getTeam = (id: string): NFLTeam => {
-  const team = NFL_TEAMS.find(t => t.id === id)
-  if (!team) throw new Error(`Team not found: ${id}`)
+  // Handle team abbreviation mapping
+  const teamMap: Record<string, string> = {
+    'wsh': 'wsh', // Washington Commanders
+    'lac': 'lac', // Los Angeles Chargers
+    'lar': 'lar', // Los Angeles Rams
+    'sf': 'sf',   // San Francisco 49ers
+    'ne': 'ne',   // New England Patriots
+    'no': 'no',   // New Orleans Saints
+    'nyg': 'nyg', // New York Giants
+    'nyj': 'nyj', // New York Jets
+    'lv': 'lv',   // Las Vegas Raiders
+    'kc': 'kc',   // Kansas City Chiefs
+    'gb': 'gb',   // Green Bay Packers
+    'tb': 'tb'    // Tampa Bay Buccaneers
+  }
+  
+  const mappedId = teamMap[id] || id
+  const team = NFL_TEAMS.find(t => t.id === mappedId)
+  if (!team) {
+    console.error(`Team not found: ${id} (mapped to: ${mappedId})`)
+    // Return a fallback team to prevent crashes
+    return { 
+      id: mappedId, 
+      name: 'Unknown', 
+      city: id.toUpperCase(), 
+      abbreviation: id.toUpperCase(), 
+      conference: 'AFC', 
+      division: 'East' 
+    }
+  }
   return team
 }
 
@@ -252,27 +280,38 @@ export const generateCompleteNFLSchedule = (): NFLGame[] => {
       
       // Only add game once (when processing home team to avoid duplicates)
       if (!isAway) {
-        const gameId = `w${week}g${teamId}${opponentId}`
-        const homeTeam = getTeam(teamId)
-        const awayTeam = getTeam(opponentId)
-        
-        schedule.push({
-          id: gameId,
-          week,
-          homeTeam,
-          awayTeam,
-          gameTime: getGameTime(week, schedule.filter(g => g.week === week).length),
-          isCompleted: week < getCurrentWeek()
-        })
+        try {
+          const gameId = `w${week}g${teamId}${opponentId}`
+          const homeTeam = getTeam(teamId)
+          const awayTeam = getTeam(opponentId)
+          
+          schedule.push({
+            id: gameId,
+            week,
+            homeTeam,
+            awayTeam,
+            gameTime: getGameTime(week, schedule.filter(g => g.week === week).length),
+            isCompleted: week < getCurrentWeek()
+          })
+        } catch (error) {
+          console.error(`Error creating game: ${teamId} vs ${opponentId} (week ${week})`, error)
+        }
       }
     })
   })
 
+  console.log(`Generated ${schedule.length} games total`)
+  return schedule
 }
 
 // Update the main function to use the complete schedule
 export const generateNFLSchedule = (): NFLGame[] => {
-  return generateCompleteNFLSchedule()
+  try {
+    return generateCompleteNFLSchedule()
+  } catch (error) {
+    console.error('Error generating NFL schedule:', error)
+    return []
+  }
 }
 
 export const getCurrentWeek = (): number => {
@@ -296,5 +335,8 @@ export const getCurrentWeek = (): number => {
 
 export const getGamesForWeek = (week: number): NFLGame[] => {
   const schedule = generateNFLSchedule()
+  if (!schedule || !Array.isArray(schedule)) {
+    return []
+  }
   return schedule.filter(game => game.week === week)
 }
