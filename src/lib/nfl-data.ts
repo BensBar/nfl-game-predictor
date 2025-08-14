@@ -29,7 +29,7 @@ export const NFL_TEAMS: NFLTeam[] = [
   { id: 'dal', name: 'Cowboys', city: 'Dallas', abbreviation: 'DAL', conference: 'NFC', division: 'East' },
   { id: 'nyg', name: 'Giants', city: 'New York', abbreviation: 'NYG', conference: 'NFC', division: 'East' },
   { id: 'phi', name: 'Eagles', city: 'Philadelphia', abbreviation: 'PHI', conference: 'NFC', division: 'East' },
-  { id: 'was', name: 'Commanders', city: 'Washington', abbreviation: 'WAS', conference: 'NFC', division: 'East' },
+  { id: 'wsh', name: 'Commanders', city: 'Washington', abbreviation: 'WSH', conference: 'NFC', division: 'East' },
   
   // NFC North
   { id: 'chi', name: 'Bears', city: 'Chicago', abbreviation: 'CHI', conference: 'NFC', division: 'North' },
@@ -181,139 +181,45 @@ const getTeam = (id: string): NFLTeam => {
   return team
 }
 
-// Complete 2025-26 NFL Schedule with all 18 weeks
+// Accurate 2025-26 NFL Schedule based on official data
 export const generateCompleteNFLSchedule = (): NFLGame[] => {
   const schedule: NFLGame[] = []
   
-  // All 18 weeks of matchups (home team listed first)
-  const weeklyMatchups: Array<Array<[string, string]>> = [
-    // Week 1 - Season Opener (September 4-8, 2025)
-    [
-      ['kc', 'bal'], ['buf', 'mia'], ['ne', 'nyj'], ['cin', 'cle'],
-      ['pit', 'hou'], ['ind', 'jax'], ['ten', 'den'], ['lac', 'lv'],
-      ['phi', 'was'], ['dal', 'nyg'], ['det', 'gb'], ['chi', 'min'],
-      ['atl', 'car'], ['no', 'tb'], ['sf', 'sea'], ['lar', 'ari']
-    ],
-    // Week 2 (September 11-15, 2025)
-    [
-      ['nyj', 'buf'], ['mia', 'ne'], ['bal', 'cin'], ['cle', 'pit'],
-      ['hou', 'ind'], ['jax', 'ten'], ['den', 'kc'], ['lv', 'lac'],
-      ['was', 'dal'], ['nyg', 'phi'], ['gb', 'chi'], ['min', 'det'],
-      ['car', 'no'], ['tb', 'atl'], ['sea', 'lar'], ['ari', 'sf']
-    ],
-    // Week 3 (September 18-22, 2025)
-    [
-      ['buf', 'ne'], ['mia', 'nyj'], ['pit', 'bal'], ['cin', 'cle'],
-      ['ind', 'hou'], ['ten', 'jax'], ['kc', 'den'], ['lac', 'lv'],
-      ['dal', 'phi'], ['was', 'nyg'], ['chi', 'det'], ['gb', 'min'],
-      ['no', 'atl'], ['tb', 'car'], ['sf', 'ari'], ['lar', 'sea']
-    ],
-    // Week 4 (September 25-29, 2025)
-    [
-      ['ne', 'mia'], ['nyj', 'buf'], ['bal', 'cle'], ['pit', 'cin'],
-      ['jax', 'hou'], ['ten', 'ind'], ['den', 'lac'], ['lv', 'kc'],
-      ['phi', 'nyg'], ['dal', 'was'], ['det', 'min'], ['chi', 'gb'],
-      ['atl', 'tb'], ['car', 'no'], ['sea', 'sf'], ['ari', 'lar']
-    ],
-    // Week 5 (October 2-6, 2025)
-    [
-      ['buf', 'nyj'], ['mia', 'ne'], ['cle', 'bal'], ['cin', 'pit'],
-      ['hou', 'ten'], ['ind', 'jax'], ['kc', 'lv'], ['lac', 'den'],
-      ['nyg', 'dal'], ['was', 'phi'], ['min', 'chi'], ['gb', 'det'],
-      ['tb', 'no'], ['atl', 'car'], ['lar', 'sf'], ['ari', 'sea']
-    ],
-    // Week 6 (October 9-13, 2025)
-    [
-      ['ne', 'buf'], ['nyj', 'mia'], ['bal', 'pit'], ['cle', 'cin'],
-      ['ten', 'hou'], ['jax', 'ind'], ['den', 'kc'], ['lv', 'lac'],
-      ['phi', 'was'], ['dal', 'nyg'], ['det', 'chi'], ['gb', 'min'],
-      ['no', 'atl'], ['car', 'tb'], ['sf', 'sea'], ['lar', 'ari']
-    ],
-    // Week 7 (October 16-20, 2025)
-    [
-      ['buf', 'ne'], ['mia', 'nyj'], ['cin', 'bal'], ['pit', 'cle'],
-      ['hou', 'jax'], ['ind', 'ten'], ['kc', 'lac'], ['den', 'lv'],
-      ['was', 'dal'], ['nyg', 'phi'], ['chi', 'gb'], ['min', 'det'],
-      ['atl', 'no'], ['tb', 'car'], ['sea', 'ari'], ['sf', 'lar']
-    ],
-    // Week 8 (October 23-27, 2025)
-    [
-      ['nyj', 'ne'], ['buf', 'mia'], ['bal', 'cle'], ['cin', 'pit'],
-      ['jax', 'ten'], ['hou', 'ind'], ['lac', 'kc'], ['lv', 'den'],
-      ['dal', 'phi'], ['was', 'nyg'], ['gb', 'chi'], ['det', 'min'],
-      ['car', 'atl'], ['no', 'tb'], ['ari', 'sf'], ['sea', 'lar']
-    ],
-    // Week 9 (October 30 - November 3, 2025)
-    [
-      ['mia', 'buf'], ['ne', 'nyj'], ['pit', 'bal'], ['cle', 'cin'],
-      ['ten', 'hou'], ['ind', 'jax'], ['den', 'kc'], ['lac', 'lv'],
-      ['phi', 'dal'], ['nyg', 'was'], ['chi', 'det'], ['min', 'gb'],
-      ['tb', 'atl'], ['no', 'car'], ['lar', 'sf'], ['ari', 'sea']
-    ],
-    // Week 10 (November 6-10, 2025)
-    [
-      ['buf', 'nyj'], ['ne', 'mia'], ['bal', 'cin'], ['pit', 'cle'],
-      ['hou', 'jax'], ['ten', 'ind'], ['kc', 'den'], ['lv', 'lac'],
-      ['was', 'phi'], ['dal', 'nyg'], ['det', 'gb'], ['chi', 'min'],
-      ['atl', 'car'], ['tb', 'no'], ['sf', 'sea'], ['lar', 'ari']
-    ],
-    // Week 11 (November 13-17, 2025)
-    [
-      ['nyj', 'buf'], ['mia', 'ne'], ['cle', 'bal'], ['cin', 'pit'],
-      ['jax', 'hou'], ['ind', 'ten'], ['lac', 'kc'], ['den', 'lv'],
-      ['phi', 'was'], ['nyg', 'dal'], ['gb', 'det'], ['min', 'chi'],
-      ['car', 'atl'], ['no', 'tb'], ['sea', 'sf'], ['ari', 'lar']
-    ],
-    // Week 12 (November 20-24, 2025) - Thanksgiving Week
-    [
-      ['ne', 'buf'], ['nyj', 'mia'], ['bal', 'pit'], ['cle', 'cin'],
-      ['hou', 'ten'], ['jax', 'ind'], ['kc', 'lv'], ['den', 'lac'],
-      ['dal', 'was'], ['phi', 'nyg'], ['det', 'chi'], ['gb', 'min'],
-      ['tb', 'atl'], ['car', 'no'], ['lar', 'sf'], ['sea', 'ari']
-    ],
-    // Week 13 (November 27 - December 1, 2025)
-    [
-      ['buf', 'mia'], ['ne', 'nyj'], ['cin', 'bal'], ['pit', 'cle'],
-      ['ten', 'jax'], ['ind', 'hou'], ['lv', 'kc'], ['lac', 'den'],
-      ['was', 'dal'], ['nyg', 'phi'], ['chi', 'gb'], ['min', 'det'],
-      ['atl', 'tb'], ['no', 'car'], ['sf', 'lar'], ['ari', 'sea']
-    ],
-    // Week 14 (December 4-8, 2025)
-    [
-      ['mia', 'nyj'], ['buf', 'ne'], ['bal', 'cle'], ['cin', 'pit'],
-      ['hou', 'jax'], ['ten', 'ind'], ['kc', 'lac'], ['den', 'lv'],
-      ['phi', 'dal'], ['was', 'nyg'], ['gb', 'chi'], ['det', 'min'],
-      ['car', 'tb'], ['atl', 'no'], ['sea', 'sf'], ['lar', 'ari']
-    ],
-    // Week 15 (December 11-15, 2025)
-    [
-      ['nyj', 'ne'], ['mia', 'buf'], ['cle', 'bal'], ['pit', 'cin'],
-      ['jax', 'ten'], ['hou', 'ind'], ['lac', 'lv'], ['kc', 'den'],
-      ['dal', 'nyg'], ['phi', 'was'], ['chi', 'min'], ['gb', 'det'],
-      ['tb', 'car'], ['no', 'atl'], ['ari', 'lar'], ['sf', 'sea']
-    ],
-    // Week 16 (December 18-22, 2025)
-    [
-      ['buf', 'ne'], ['nyj', 'mia'], ['bal', 'pit'], ['cin', 'cle'],
-      ['ten', 'hou'], ['ind', 'jax'], ['den', 'kc'], ['lv', 'lac'],
-      ['was', 'phi'], ['nyg', 'dal'], ['det', 'gb'], ['min', 'chi'],
-      ['atl', 'car'], ['tb', 'no'], ['sea', 'lar'], ['sf', 'ari']
-    ],
-    // Week 17 (December 25-29, 2025) - Christmas Week
-    [
-      ['ne', 'nyj'], ['buf', 'mia'], ['pit', 'bal'], ['cle', 'cin'],
-      ['hou', 'jax'], ['ind', 'ten'], ['lac', 'kc'], ['lv', 'den'],
-      ['phi', 'dal'], ['was', 'nyg'], ['chi', 'det'], ['gb', 'min'],
-      ['car', 'atl'], ['no', 'tb'], ['lar', 'ari'], ['sea', 'sf']
-    ],
-    // Week 18 (January 1-5, 2026) - Season Finale
-    [
-      ['mia', 'ne'], ['nyj', 'buf'], ['bal', 'cle'], ['cin', 'pit'],
-      ['jax', 'hou'], ['ten', 'ind'], ['kc', 'lv'], ['den', 'lac'],
-      ['dal', 'was'], ['nyg', 'phi'], ['min', 'gb'], ['det', 'chi'],
-      ['atl', 'no'], ['tb', 'car'], ['ari', 'sf'], ['lar', 'sea']
-    ]
-  ]
+  // Official 2025-26 NFL Schedule - mapping team abbreviations to their schedule
+  const teamSchedules: Record<string, string[]> = {
+    'ari': ['@no', 'car', '@sf', 'sea', 'ten', '@ind', 'gb', 'bye', '@dal', '@sea', 'sf', 'jax', '@tb', 'lar', '@hou', 'atl', '@cin', '@lar'],
+    'atl': ['tb', '@min', '@car', 'wsh', 'bye', 'buf', '@sf', 'mia', '@ne', '@ind', 'car', '@no', '@nyj', 'sea', '@tb', '@ari', 'lar', 'no'],
+    'bal': ['@buf', 'cle', 'det', '@kc', 'hou', 'lar', 'bye', 'chi', '@mia', '@min', '@cle', 'nyj', 'cin', 'pit', '@cin', 'ne', '@gb', '@pit'],
+    'buf': ['bal', '@nyj', 'mia', 'no', 'ne', '@atl', 'bye', '@car', 'kc', '@mia', 'tb', '@hou', '@pit', 'cin', '@ne', '@cle', 'phi', 'nyj'],
+    'car': ['@jax', '@ari', 'atl', '@ne', 'mia', 'dal', '@nyj', 'buf', '@gb', 'no', '@atl', '@sf', 'lar', 'bye', '@no', 'tb', 'sea', '@tb'],
+    'chi': ['min', '@det', 'dal', '@lv', 'bye', '@wsh', 'no', '@bal', '@cin', 'nyg', '@min', 'pit', '@phi', '@gb', 'cle', 'gb', '@sf', 'det'],
+    'cin': ['@cle', 'jax', '@min', '@den', 'det', '@gb', 'pit', 'nyj', 'chi', 'bye', '@pit', 'ne', '@bal', '@buf', 'bal', '@mia', 'ari', 'cle'],
+    'cle': ['cin', '@bal', 'gb', '@det', 'min', '@pit', 'mia', '@ne', 'bye', '@nyj', 'bal', '@lv', 'sf', 'ten', '@chi', 'buf', 'pit', '@cin'],
+    'dal': ['@phi', 'nyg', '@chi', 'gb', '@nyj', '@car', 'wsh', '@den', 'ari', 'bye', '@lv', 'phi', 'kc', '@det', 'min', 'lac', '@wsh', '@nyg'],
+    'den': ['ten', '@ind', '@lac', 'cin', '@phi', '@nyj', 'nyg', 'dal', '@hou', 'lv', 'kc', 'bye', '@wsh', '@lv', 'gb', 'jax', '@kc', 'lac'],
+    'det': ['@gb', 'chi', '@bal', 'cle', '@cin', '@kc', 'tb', 'bye', 'min', '@wsh', '@phi', 'nyg', 'gb', 'dal', '@lar', 'pit', '@min', '@chi'],
+    'gb': ['det', 'wsh', '@cle', '@dal', 'bye', 'cin', '@ari', '@pit', 'car', 'phi', '@nyg', 'min', '@det', 'chi', '@den', '@chi', 'bal', '@min'],
+    'hou': ['@lar', 'tb', '@jax', 'ten', '@bal', 'bye', '@sea', 'sf', 'den', 'jax', '@ten', 'buf', '@ind', '@kc', 'ari', 'lv', '@lac', 'ind'],
+    'ind': ['mia', 'den', '@ten', '@lar', 'lv', 'ari', '@lac', 'ten', '@pit', 'atl', 'bye', '@kc', 'hou', '@jax', '@sea', 'sf', 'jax', '@hou'],
+    'jax': ['car', '@cin', 'hou', '@sf', 'kc', 'sea', 'lar', 'bye', '@lv', '@hou', 'lac', '@ari', '@ten', 'ind', 'nyj', '@den', '@ind', 'ten'],
+    'kc': ['@lac', 'phi', '@nyg', 'bal', '@jax', 'det', 'lv', 'wsh', '@buf', 'bye', '@den', 'ind', '@dal', 'hou', 'lac', '@ten', 'den', '@lv'],
+    'lv': ['@ne', 'lac', '@wsh', 'chi', '@ind', 'ten', '@kc', 'bye', 'jax', '@den', 'dal', 'cle', '@lac', 'den', '@phi', '@hou', 'nyg', 'kc'],
+    'lar': ['hou', '@ten', '@phi', 'ind', 'sf', '@bal', '@jax', 'bye', 'no', '@sf', 'sea', 'tb', '@car', '@ari', 'det', '@sea', '@atl', 'ari'],
+    'lac': ['kc', '@lv', 'den', '@nyg', 'wsh', '@mia', 'ind', 'min', '@ten', 'pit', '@jax', 'bye', 'lv', 'phi', '@kc', '@dal', 'hou', '@den'],
+    'mia': ['@ind', 'ne', '@buf', 'nyj', '@car', 'lac', '@cle', '@atl', 'bal', 'buf', 'wsh', 'bye', 'no', '@nyj', '@pit', 'cin', 'tb', '@ne'],
+    'min': ['@chi', 'atl', 'cin', '@pit', '@cle', 'bye', 'phi', '@lac', '@det', 'bal', 'chi', '@gb', '@sea', 'wsh', '@dal', '@nyg', 'det', 'gb'],
+    'ne': ['lv', '@mia', 'pit', 'car', '@buf', '@no', '@ten', 'cle', 'atl', '@tb', 'nyj', '@cin', 'nyg', 'bye', 'buf', '@bal', '@nyj', 'mia'],
+    'no': ['ari', 'sf', '@sea', '@buf', 'nyg', 'ne', '@chi', 'tb', '@lar', '@car', 'bye', 'atl', '@mia', '@tb', 'car', 'nyj', '@ten', '@atl'],
+    'nyg': ['@wsh', '@dal', 'kc', 'lac', '@no', 'phi', '@den', '@phi', 'sf', '@chi', 'gb', '@det', '@ne', 'bye', 'wsh', 'min', '@lv', 'dal'],
+    'nyj': ['pit', 'buf', '@tb', '@mia', 'dal', 'den', 'car', '@cin', 'bye', 'cle', '@ne', '@bal', 'atl', 'mia', '@jax', '@no', 'ne', '@buf'],
+    'phi': ['dal', '@kc', 'lar', '@tb', 'den', '@nyg', '@min', 'nyg', 'bye', '@gb', 'det', '@dal', 'chi', '@lac', 'lv', '@wsh', '@buf', 'wsh'],
+    'pit': ['@nyj', 'sea', '@ne', 'min', 'bye', 'cle', '@cin', 'gb', 'ind', '@lac', 'cin', '@chi', 'buf', '@bal', 'mia', '@det', '@cle', 'bal'],
+    'sf': ['@sea', '@no', 'ari', 'jax', '@lar', '@tb', 'atl', '@hou', '@nyg', 'lar', '@ari', 'car', '@cle', 'bye', 'ten', '@ind', 'chi', 'sea'],
+    'sea': ['sf', '@pit', 'no', '@ari', 'tb', '@jax', 'hou', 'bye', '@wsh', 'ari', '@lar', '@ten', 'min', '@atl', 'ind', 'lar', '@car', '@sf'],
+    'tb': ['@atl', '@hou', 'nyj', 'phi', '@sea', 'sf', '@det', '@no', 'bye', 'ne', '@buf', '@lar', 'ari', 'no', 'atl', '@car', '@mia', 'car'],
+    'ten': ['@den', 'lar', 'ind', '@hou', '@ari', '@lv', 'ne', '@ind', 'lac', 'bye', 'hou', 'sea', 'jax', '@cle', '@sf', 'kc', 'no', '@jax'],
+    'wsh': ['nyg', '@gb', 'lv', '@atl', '@lac', 'chi', '@dal', '@kc', 'sea', 'det', '@mia', 'bye', 'den', '@min', '@nyg', 'phi', 'dal', '@phi']
+  }
 
   // Game time assignments by slot
   const getGameTime = (weekNum: number, gameIndex: number): string => {
@@ -332,24 +238,36 @@ export const generateCompleteNFLSchedule = (): NFLGame[] => {
     return gameIndex < 15 ? 'Sun 1:00 PM ET' : 'Sun 4:25 PM ET'
   }
 
-  // Build the complete schedule
-  weeklyMatchups.forEach((weekGames, weekIndex) => {
-    const week = weekIndex + 1
-    const currentWeek = getCurrentWeek()
-    
-    weekGames.forEach((matchup, gameIndex) => {
-      schedule.push({
-        id: `w${week}g${gameIndex + 1}`,
-        week,
-        homeTeam: getTeam(matchup[0]),
-        awayTeam: getTeam(matchup[1]),
-        gameTime: getGameTime(week, gameIndex),
-        isCompleted: week < currentWeek
-      })
+  // Convert team schedules to game objects
+  Object.entries(teamSchedules).forEach(([teamId, games]) => {
+    games.forEach((opponent, weekIndex) => {
+      const week = weekIndex + 1
+      
+      // Skip bye weeks
+      if (opponent === 'bye') return
+      
+      // Determine home/away and opponent ID
+      const isAway = opponent.startsWith('@')
+      const opponentId = isAway ? opponent.slice(1) : opponent
+      
+      // Only add game once (when processing home team to avoid duplicates)
+      if (!isAway) {
+        const gameId = `w${week}g${teamId}${opponentId}`
+        const homeTeam = getTeam(teamId)
+        const awayTeam = getTeam(opponentId)
+        
+        schedule.push({
+          id: gameId,
+          week,
+          homeTeam,
+          awayTeam,
+          gameTime: getGameTime(week, schedule.filter(g => g.week === week).length),
+          isCompleted: week < getCurrentWeek()
+        })
+      }
     })
   })
 
-  return schedule
 }
 
 // Update the main function to use the complete schedule
