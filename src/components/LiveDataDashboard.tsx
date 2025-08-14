@@ -179,13 +179,21 @@ export function LiveDataDashboard({
                       <SelectValue placeholder="Choose a game from this week" />
                     </SelectTrigger>
                     <SelectContent>
-                      {(currentWeekGames || []).map((game) => (
-                        <SelectItem key={game.id} value={game.id}>
-                          {game.awayTeam.city} @ {game.homeTeam.city} ({game.gameTime})
-                          {game.isCompleted && ' - Completed'}
-                          {game.isPreseason && ' - Preseason'}
-                        </SelectItem>
-                      ))}
+                      {(currentWeekGames || []).map((game) => {
+                        // Validate game data before rendering
+                        if (!game?.homeTeam?.city || !game?.awayTeam?.city) {
+                          console.warn('Skipping game with invalid team data:', game)
+                          return null
+                        }
+                        
+                        return (
+                          <SelectItem key={game.id} value={game.id}>
+                            {game.awayTeam.city} @ {game.homeTeam.city} ({game.gameTime})
+                            {game.isCompleted && ' - Completed'}
+                            {game.isPreseason && ' - Preseason'}
+                          </SelectItem>
+                        )
+                      }).filter(Boolean)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -235,7 +243,7 @@ export function LiveDataDashboard({
                   </Alert>
                 )}
                 
-                {selectedGame && (
+                {selectedGame && selectedGame.homeTeam?.city && selectedGame.awayTeam?.city && (
                   <Alert className="border-green-200 bg-green-50/50">
                     <Target className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800">

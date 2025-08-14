@@ -375,20 +375,31 @@ export class RealSportsAPI {
     const weekGames = preseasonSchedule[week as keyof typeof preseasonSchedule] || []
     
     return weekGames.map((gameData, index) => {
-      const gameId = `ps${Math.abs(week)}g${index + 1}`
-      const homeTeam = this.getTeamById(gameData.home)
-      const awayTeam = this.getTeamById(gameData.away)
-      
-      return {
-        id: gameId,
-        week,
-        homeTeam,
-        awayTeam,
-        gameTime: gameData.time,
-        isCompleted: false,
-        isPreseason: true
+      try {
+        const gameId = `ps${Math.abs(week)}g${index + 1}`
+        const homeTeam = this.getTeamById(gameData.home)
+        const awayTeam = this.getTeamById(gameData.away)
+        
+        // Ensure both teams have valid data
+        if (!homeTeam || !awayTeam || !homeTeam.city || !awayTeam.city) {
+          console.error(`Invalid team data for game ${gameId}:`, { homeTeam, awayTeam })
+          return null
+        }
+        
+        return {
+          id: gameId,
+          week,
+          homeTeam,
+          awayTeam,
+          gameTime: gameData.time,
+          isCompleted: false,
+          isPreseason: true
+        }
+      } catch (error) {
+        console.error(`Error creating preseason game ${index}:`, error)
+        return null
       }
-    }).filter(game => game.homeTeam && game.awayTeam)
+    }).filter((game): game is NFLGame => game !== null)
   }
 
   private async getBuiltInRegularSeasonGames(week: number): Promise<NFLGame[]> {
@@ -400,7 +411,7 @@ export class RealSportsAPI {
   private getTeamById(id: string): NFLTeam {
     const team = NFL_TEAMS.find(t => t.id === id)
     if (!team) {
-      console.warn(`Team not found: ${id}`)
+      console.warn(`Team not found: ${id}, creating fallback team`)
       // Return a fallback team to prevent crashes
       return { 
         id, 

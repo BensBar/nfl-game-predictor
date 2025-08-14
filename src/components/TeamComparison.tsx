@@ -11,6 +11,17 @@ interface TeamComparisonProps {
 }
 
 export function TeamComparison({ homeTeam, awayTeam }: TeamComparisonProps) {
+  // Validate team data
+  if (!homeTeam?.city || !awayTeam?.city || !homeTeam?.id || !awayTeam?.id) {
+    return (
+      <Card className="border-red-200">
+        <CardContent className="p-6 text-center">
+          <div className="text-red-600">Error: Invalid team data for comparison</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const [homeStats, setHomeStats] = useState<TeamStats | null>(null)
   const [awayStats, setAwayStats] = useState<TeamStats | null>(null)
   const [homeGames, setHomeGames] = useState<GameResult[]>([])

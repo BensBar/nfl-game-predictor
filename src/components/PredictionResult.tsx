@@ -23,6 +23,17 @@ export function PredictionResult({
   confidence,
   factors
 }: PredictionResultProps) {
+  // Validate team data
+  if (!homeTeam?.city || !awayTeam?.city) {
+    return (
+      <Card className="border-red-200">
+        <CardContent className="p-6 text-center">
+          <div className="text-red-600">Error: Invalid team data for prediction</div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const favoredTeam = homeWinProbability > awayWinProbability ? homeTeam : awayTeam
   const favoredPercentage = Math.max(homeWinProbability, awayWinProbability)
 

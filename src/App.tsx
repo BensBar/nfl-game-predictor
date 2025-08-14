@@ -37,7 +37,19 @@ function App() {
         console.log(`Loading games for current week ${currentWeek}...`)
         const games = await getGamesForWeek(currentWeek)
         console.log(`Loaded ${games?.length || 0} games for current week ${currentWeek}`)
-        setWeekGames(Array.isArray(games) ? games : [])
+        
+        // Validate all games have proper team data
+        const validGames = Array.isArray(games) ? games.filter(game => {
+          const isValid = game?.homeTeam?.city && game?.awayTeam?.city && 
+                         game?.homeTeam?.id && game?.awayTeam?.id
+          if (!isValid) {
+            console.warn('Filtering out invalid game:', game)
+          }
+          return isValid
+        }) : []
+        
+        console.log(`✅ ${validGames.length} valid games ready for predictions`)
+        setWeekGames(validGames)
         setSelectedGame(null)
         setCurrentPrediction(null)
       } catch (error) {
@@ -60,12 +72,24 @@ function App() {
   const handleGameSelect = (gameId: string) => {
     try {
       const game = Array.isArray(weekGames) ? weekGames.find(g => g.id === gameId) : null
-      setSelectedGame(game || null)
-      setCurrentPrediction(null)
+      
+      // Validate game data before setting
+      if (game && game.homeTeam && game.awayTeam && 
+          game.homeTeam.city && game.awayTeam.city) {
+        setSelectedGame(game)
+        setCurrentPrediction(null)
+        console.log(`✅ Selected game: ${game.awayTeam.city} @ ${game.homeTeam.city}`)
+      } else {
+        console.error('Invalid game data:', game)
+        setSelectedGame(null)
+        setCurrentPrediction(null)
+        toast.error('Unable to select game - invalid team data')
+      }
     } catch (error) {
       console.error('Error selecting game:', gameId, error)
       setSelectedGame(null)
       setCurrentPrediction(null)
+      toast.error('Error selecting game')
     }
   }
 
@@ -79,6 +103,14 @@ function App() {
 
     if (selectedGame.isCompleted) {
       toast.error('Cannot predict completed games')
+      return
+    }
+
+    // Validate that teams have proper data
+    if (!selectedGame.homeTeam || !selectedGame.awayTeam || 
+        !selectedGame.homeTeam.city || !selectedGame.awayTeam.city) {
+      toast.error('Invalid game data - missing team information')
+      console.error('Game validation failed:', selectedGame)
       return
     }
 

@@ -26,7 +26,7 @@ export function WeeklySchedule({ week, games, selectedGame, onGameSelect }: Week
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {games.map((game) => (
+        {games.filter(game => game?.homeTeam?.city && game?.awayTeam?.city).map((game) => (
           <Card 
             key={game.id} 
             className={`cursor-pointer transition-all hover:shadow-md ${
