@@ -223,7 +223,7 @@ export function AccuracyDashboard({ onClearData }: AccuracyDashboardProps) {
 
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="font-medium">Low Confidence (<60%)</span>
+                        <span className="font-medium">Low Confidence (&lt;60%)</span>
                         <Badge variant="secondary">
                           {formatAccuracy(stats.byConfidenceLevel.low.accuracy)}
                         </Badge>
