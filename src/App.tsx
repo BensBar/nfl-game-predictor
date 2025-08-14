@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -147,8 +148,6 @@ function App() {
     setPredictions([])
     toast.success('History cleared')
   }
-
-  const currentWeek = getCurrentWeek()
 
   return (
     <div className="min-h-screen bg-background">
