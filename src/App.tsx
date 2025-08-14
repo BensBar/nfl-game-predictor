@@ -1,41 +1,61 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Toaster } from '@/components/ui/sonner'
-import { NFL_TEAMS, calculatePrediction } from '@/lib/nfl-data'
-import { NFLTeam, Prediction, PredictionHistory } from '@/types/nfl'
+import { getCurrentWeek, getGamesForWeek, calculatePrediction } from '@/lib/nfl-data'
+import { NFLGame, Prediction, PredictionHistory } from '@/types/nfl'
 import { PredictionResult } from '@/components/PredictionResult'
 import { TeamComparison } from '@/components/TeamComparison'
 import { PredictionHistoryComponent } from '@/components/PredictionHistory'
-import { Target, ChartBar, Clock } from '@phosphor-icons/react'
+import { WeeklySchedule } from '@/components/WeeklySchedule'
+import { Target, ChartBar, Clock, Calendar } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 function App() {
-  const [homeTeam, setHomeTeam] = useState<NFLTeam | null>(null)
-  const [awayTeam, setAwayTeam] = useState<NFLTeam | null>(null)
+  const [selectedWeek, setSelectedWeek] = useState<number>(getCurrentWeek())
+  const [weekGames, setWeekGames] = useState<NFLGame[]>([])
+  const [selectedGame, setSelectedGame] = useState<NFLGame | null>(null)
   const [currentPrediction, setCurrentPrediction] = useState<Prediction | null>(null)
   const [predictions, setPredictions] = useKV<PredictionHistory[]>('prediction-history', [])
 
+  useEffect(() => {
+    const games = getGamesForWeek(selectedWeek)
+    setWeekGames(games)
+    setSelectedGame(null)
+    setCurrentPrediction(null)
+  }, [selectedWeek])
+
+  const handleWeekChange = (week: string) => {
+    const weekNum = parseInt(week)
+    setSelectedWeek(weekNum)
+  }
+
+  const handleGameSelect = (gameId: string) => {
+    const game = weekGames.find(g => g.id === gameId)
+    setSelectedGame(game || null)
+    setCurrentPrediction(null)
+  }
+
   const handlePredict = () => {
-    if (!homeTeam || !awayTeam) {
-      toast.error('Please select both teams')
+    if (!selectedGame) {
+      toast.error('Please select a game')
       return
     }
 
-    if (homeTeam.id === awayTeam.id) {
-      toast.error('Please select different teams')
+    if (selectedGame.isCompleted) {
+      toast.error('Cannot predict completed games')
       return
     }
 
-    const result = calculatePrediction(homeTeam, awayTeam)
+    const result = calculatePrediction(selectedGame.homeTeam, selectedGame.awayTeam)
     
     const prediction: Prediction = {
       id: Date.now().toString(),
-      homeTeam,
-      awayTeam,
+      homeTeam: selectedGame.homeTeam,
+      awayTeam: selectedGame.awayTeam,
       homeWinProbability: result.homeWinProbability,
       awayWinProbability: result.awayWinProbability,
       confidence: result.confidence,
@@ -59,73 +79,63 @@ function App() {
     toast.success('History cleared')
   }
 
-  const availableAwayTeams = NFL_TEAMS.filter(team => team.id !== homeTeam?.id)
-  const availableHomeTeams = NFL_TEAMS.filter(team => team.id !== awayTeam?.id)
+  const currentWeek = getCurrentWeek()
+  const weekOptions = Array.from({ length: 18 }, (_, i) => i + 1)
 
   return (
     <div className="min-h-screen bg-background">
       <Toaster />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">NFL Game Predictor</h1>
+          <h1 className="text-4xl font-bold text-primary mb-2">NFL Weekly Game Predictor</h1>
           <p className="text-lg text-muted-foreground">
-            Advanced analytics to predict NFL game outcomes
+            Advanced analytics for real NFL weekly matchups
           </p>
         </div>
 
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Target className="text-primary" />
-              Select Matchup
+              <Calendar className="text-primary" />
+              Select Week & Game
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Home Team</label>
+                <label className="text-sm font-medium">NFL Week</label>
                 <Select 
-                  value={homeTeam?.id || ''} 
-                  onValueChange={(value) => {
-                    const team = NFL_TEAMS.find(t => t.id === value)
-                    setHomeTeam(team || null)
-                    setCurrentPrediction(null)
-                  }}
+                  value={selectedWeek.toString()} 
+                  onValueChange={handleWeekChange}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select home team" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableHomeTeams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.city} {team.name}
+                    {weekOptions.map((week) => (
+                      <SelectItem key={week} value={week.toString()}>
+                        Week {week} {week === currentWeek && '(Current)'}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="text-center text-lg font-medium text-muted-foreground">
-                vs
-              </div>
-
               <div className="space-y-2">
-                <label className="text-sm font-medium">Away Team</label>
+                <label className="text-sm font-medium">Game</label>
                 <Select 
-                  value={awayTeam?.id || ''} 
-                  onValueChange={(value) => {
-                    const team = NFL_TEAMS.find(t => t.id === value)
-                    setAwayTeam(team || null)
-                    setCurrentPrediction(null)
-                  }}
+                  value={selectedGame?.id || ''} 
+                  onValueChange={handleGameSelect}
+                  disabled={weekGames.length === 0}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select away team" />
+                    <SelectValue placeholder="Select a game" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableAwayTeams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.city} {team.name}
+                    {weekGames.map((game) => (
+                      <SelectItem key={game.id} value={game.id}>
+                        {game.awayTeam.city} @ {game.homeTeam.city} ({game.gameTime})
+                        {game.isCompleted && ' - Completed'}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -136,7 +146,7 @@ function App() {
             <div className="flex justify-center mt-6">
               <Button 
                 onClick={handlePredict}
-                disabled={!homeTeam || !awayTeam || homeTeam.id === awayTeam.id}
+                disabled={!selectedGame || selectedGame.isCompleted}
                 size="lg"
                 className="min-w-32"
               >
@@ -146,7 +156,7 @@ function App() {
           </CardContent>
         </Card>
 
-        {currentPrediction && homeTeam && awayTeam && (
+        {currentPrediction && selectedGame && (
           <div className="space-y-6">
             <div className="flex justify-center">
               <Button 
@@ -159,7 +169,7 @@ function App() {
             </div>
 
             <Tabs defaultValue="prediction" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="prediction" className="flex items-center gap-2">
                   <Target size={16} />
                   Prediction
@@ -167,6 +177,10 @@ function App() {
                 <TabsTrigger value="comparison" className="flex items-center gap-2">
                   <ChartBar size={16} />
                   Team Stats
+                </TabsTrigger>
+                <TabsTrigger value="schedule" className="flex items-center gap-2">
+                  <Calendar size={16} />
+                  Schedule
                 </TabsTrigger>
                 <TabsTrigger value="history" className="flex items-center gap-2">
                   <Clock size={16} />
@@ -176,8 +190,8 @@ function App() {
 
               <TabsContent value="prediction">
                 <PredictionResult
-                  homeTeam={homeTeam}
-                  awayTeam={awayTeam}
+                  homeTeam={selectedGame.homeTeam}
+                  awayTeam={selectedGame.awayTeam}
                   homeWinProbability={currentPrediction.homeWinProbability}
                   awayWinProbability={currentPrediction.awayWinProbability}
                   confidence={currentPrediction.confidence}
@@ -187,8 +201,17 @@ function App() {
 
               <TabsContent value="comparison">
                 <TeamComparison 
-                  homeTeam={homeTeam} 
-                  awayTeam={awayTeam} 
+                  homeTeam={selectedGame.homeTeam} 
+                  awayTeam={selectedGame.awayTeam} 
+                />
+              </TabsContent>
+
+              <TabsContent value="schedule">
+                <WeeklySchedule 
+                  week={selectedWeek}
+                  games={weekGames}
+                  selectedGame={selectedGame}
+                  onGameSelect={handleGameSelect}
                 />
               </TabsContent>
 
@@ -203,14 +226,35 @@ function App() {
         )}
 
         {!currentPrediction && (
-          <div className="text-center py-12">
-            <Target size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
-            <h3 className="text-xl font-semibold mb-2 text-muted-foreground">
-              Ready to Predict
-            </h3>
-            <p className="text-muted-foreground">
-              Select two teams above to generate your first prediction
-            </p>
+          <div className="space-y-8">
+            {weekGames.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Week {selectedWeek} Games</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <WeeklySchedule 
+                    week={selectedWeek}
+                    games={weekGames}
+                    selectedGame={selectedGame}
+                    onGameSelect={handleGameSelect}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="text-center py-12">
+              <Calendar size={64} className="mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="text-xl font-semibold mb-2 text-muted-foreground">
+                Ready to Predict
+              </h3>
+              <p className="text-muted-foreground">
+                {selectedGame 
+                  ? 'Click "Generate Prediction" to analyze this matchup'
+                  : 'Select a week and game to generate predictions'
+                }
+              </p>
+            </div>
           </div>
         )}
       </div>

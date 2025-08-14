@@ -1,4 +1,4 @@
-import { NFLTeam, TeamStats, GameResult } from '@/types/nfl'
+import { NFLTeam, TeamStats, GameResult, NFLGame } from '@/types/nfl'
 
 export const NFL_TEAMS: NFLTeam[] = [
   // AFC East
@@ -170,4 +170,81 @@ export const calculatePrediction = (homeTeam: NFLTeam, awayTeam: NFLTeam) => {
     confidence: Math.min(confidence, 95),
     factors: factors.slice(0, 4)
   }
+}
+
+// Generate a realistic NFL schedule for the current season
+export const generateNFLSchedule = (): NFLGame[] => {
+  const games: NFLGame[] = []
+  let gameId = 1
+
+  // Define some common game times
+  const gameTimes = [
+    '1:00 PM ET',
+    '4:25 PM ET', 
+    '8:20 PM ET',
+    '8:15 PM ET' // Thursday/Monday night
+  ]
+
+  // Week 1-18 regular season
+  for (let week = 1; week <= 18; week++) {
+    const weekGames: NFLGame[] = []
+    const teamsUsed = new Set<string>()
+    
+    // Create a shuffled copy of teams for this week
+    const shuffledTeams = [...NFL_TEAMS].sort(() => Math.random() - 0.5)
+    
+    // Generate 16 games per week (32 teams = 16 matchups)
+    for (let i = 0; i < shuffledTeams.length && i < 32; i += 2) {
+      if (i + 1 < shuffledTeams.length) {
+        const homeTeam = shuffledTeams[i]
+        const awayTeam = shuffledTeams[i + 1]
+        
+        // Skip if teams already used (shouldn't happen with proper pairing)
+        if (teamsUsed.has(homeTeam.id) || teamsUsed.has(awayTeam.id)) {
+          continue
+        }
+        
+        teamsUsed.add(homeTeam.id)
+        teamsUsed.add(awayTeam.id)
+        
+        // Assign game times (most games Sunday 1PM and 4PM)
+        let gameTime = gameTimes[0] // Default to 1PM
+        if (weekGames.length < 6) {
+          gameTime = gameTimes[0] // 1:00 PM ET
+        } else if (weekGames.length < 10) {
+          gameTime = gameTimes[1] // 4:25 PM ET  
+        } else if (weekGames.length === 10) {
+          gameTime = gameTimes[2] // 8:20 PM ET (Sunday night)
+        } else if (weekGames.length === 11) {
+          gameTime = gameTimes[3] // 8:15 PM ET (Monday night)
+        } else {
+          gameTime = gameTimes[Math.floor(Math.random() * 2)] // Random early games
+        }
+        
+        weekGames.push({
+          id: `game-${gameId++}`,
+          week,
+          homeTeam,
+          awayTeam,
+          gameTime,
+          isCompleted: week < getCurrentWeek()
+        })
+      }
+    }
+    
+    games.push(...weekGames)
+  }
+  
+  return games
+}
+
+export const getCurrentWeek = (): number => {
+  // For demo purposes, return a fixed week during season
+  // In a real app, this would calculate based on current date
+  return 15 // Mid-season week
+}
+
+export const getGamesForWeek = (week: number): NFLGame[] => {
+  const schedule = generateNFLSchedule()
+  return schedule.filter(game => game.week === week)
 }

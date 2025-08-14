@@ -38,3 +38,14 @@ export interface Prediction {
 export interface PredictionHistory extends Prediction {
   actualResult?: 'home' | 'away'
 }
+
+export interface NFLGame {
+  id: string
+  week: number
+  homeTeam: NFLTeam
+  awayTeam: NFLTeam
+  gameTime: string
+  isCompleted?: boolean
+  homeScore?: number
+  awayScore?: number
+}
