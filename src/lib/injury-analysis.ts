@@ -16,37 +16,7 @@ const POSITION_WEIGHTS = {
   'P': 0.2,       // Punter
   'LS': 0.1,      // Long Snapper
 }
-    lastUpdated: '2024-01-16'
-  },
-  {
-    id: 'inj3',
-    playerId: 'p3',
-    playerName: 'Aaron Donald',
-    position: 'DL',
-    team: 'LAR',
-    injuryType: 'Ankle Sprain',
-    bodyPart: 'Ankle',
-    severity: 'Questionable',
-    severityRating: 2,
-    dateReported: '2024-01-13',
-    gameStatus: 'TBD',
-    impactDescription: 'Mild ankle sprain, expected to play with limited snap count',
-    lastUpdated: '2024-01-16'
-  },
-  {
-    id: 'inj4',
-    playerId: 'p4',
-    playerName: 'Davante Adams',
-    position: 'WR',
-    team: 'LV',
-    injuryType: 'Hamstring Pull',
-    bodyPart: 'Hamstring',
-    severity: 'Out',
-    severityRating: 4,
-    dateReported: '2024-01-12',
-    estimatedReturn: '2024-02-05',
-    gameStatus: 'Inactive',
-    impactDescription: 'Grade 2 hamstring pull, significant offensive impact expected',
+
 // Get team injuries from real API
 export async function getTeamInjuries(teamAbbreviation: string): Promise<PlayerInjury[]> {
   try {
