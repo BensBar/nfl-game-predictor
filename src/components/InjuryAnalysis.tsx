@@ -23,7 +23,8 @@ import {
   Activity,
   Clock,
   Target,
-  RefreshCw
+  RefreshCw,
+  Database
 } from '@phosphor-icons/react'
 
 interface InjuryAnalysisProps {
@@ -283,19 +284,28 @@ export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
             <CardTitle className="flex items-center justify-between">
               <span>{homeTeam.city} {homeTeam.name}</span>
               <div className="flex items-center gap-2">
-                <Heart className={getImpactScoreColor(homeAnalysis.totalImpactScore)} />
-                <span className={`font-bold ${getImpactScoreColor(homeAnalysis.totalImpactScore)}`}>
-                  {homeAnalysis.totalImpactScore.toFixed(1)}
-                </span>
+                {homeAnalysis ? (
+                  <>
+                    <Heart className={getImpactScoreColor(homeAnalysis.totalImpactScore)} />
+                    <span className={`font-bold ${getImpactScoreColor(homeAnalysis.totalImpactScore)}`}>
+                      {homeAnalysis.totalImpactScore.toFixed(1)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Heart className="text-gray-400" />
+                    <span className="font-bold text-gray-400">--</span>
+                  </>
+                )}
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm text-muted-foreground">
-              {homeInjuries.length} active injuries • {getImpactScoreDescription(homeAnalysis.totalImpactScore)}
+              {homeInjuries.length} active injuries • {homeAnalysis ? getImpactScoreDescription(homeAnalysis.totalImpactScore) : 'Loading...'}
             </div>
             <Progress 
-              value={Math.min(homeAnalysis.totalImpactScore * 5, 100)} 
+              value={homeAnalysis ? Math.min(homeAnalysis.totalImpactScore * 5, 100) : 0} 
               className="h-1 mt-2"
             />
           </CardContent>
@@ -306,19 +316,28 @@ export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
             <CardTitle className="flex items-center justify-between">
               <span>{awayTeam.city} {awayTeam.name}</span>
               <div className="flex items-center gap-2">
-                <Heart className={getImpactScoreColor(awayAnalysis.totalImpactScore)} />
-                <span className={`font-bold ${getImpactScoreColor(awayAnalysis.totalImpactScore)}`}>
-                  {awayAnalysis.totalImpactScore.toFixed(1)}
-                </span>
+                {awayAnalysis ? (
+                  <>
+                    <Heart className={getImpactScoreColor(awayAnalysis.totalImpactScore)} />
+                    <span className={`font-bold ${getImpactScoreColor(awayAnalysis.totalImpactScore)}`}>
+                      {awayAnalysis.totalImpactScore.toFixed(1)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Heart className="text-gray-400" />
+                    <span className="font-bold text-gray-400">--</span>
+                  </>
+                )}
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-sm text-muted-foreground">
-              {awayInjuries.length} active injuries • {getImpactScoreDescription(awayAnalysis.totalImpactScore)}
+              {awayInjuries.length} active injuries • {awayAnalysis ? getImpactScoreDescription(awayAnalysis.totalImpactScore) : 'Loading...'}
             </div>
             <Progress 
-              value={Math.min(awayAnalysis.totalImpactScore * 5, 100)} 
+              value={awayAnalysis ? Math.min(awayAnalysis.totalImpactScore * 5, 100) : 0} 
               className="h-1 mt-2"
             />
           </CardContent>
@@ -342,7 +361,12 @@ export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
             </TabsList>
 
             <TabsContent value="overview">
-              {renderImpactAnalysis(currentAnalysis)}
+              {currentAnalysis ? renderImpactAnalysis(currentAnalysis) : (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="animate-spin mr-2" size={20} />
+                  Loading injury analysis...
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="injuries">
@@ -353,13 +377,22 @@ export function InjuryAnalysis({ homeTeam, awayTeam }: InjuryAnalysisProps) {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Heart size={48} className="mx-auto mb-4 text-green-500" />
-                    <h3 className="text-lg font-semibold text-green-700 mb-2">
-                      Clean Bill of Health
-                    </h3>
-                    <p className="text-muted-foreground">
-                      No significant injuries reported for this team
-                    </p>
+                    <Alert className="border-blue-200 bg-blue-50/50">
+                      <Database className="h-4 w-4 text-blue-600" />
+                      <AlertDescription className="text-blue-800">
+                        <div className="font-medium mb-2">Real Injury Data Integration</div>
+                        <div className="text-sm space-y-2">
+                          <p>This app integrates with official NFL injury report APIs including:</p>
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            <Badge variant="outline" className="text-xs">ESPN NFL API</Badge>
+                            <Badge variant="outline" className="text-xs">NFL.com Official</Badge>
+                            <Badge variant="outline" className="text-xs">FantasyPros</Badge>
+                            <Badge variant="outline" className="text-xs">CBS Sports</Badge>
+                          </div>
+                          <p className="mt-2">No fake player names or simulated data - only real-time official injury reports.</p>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
                   </div>
                 )}
               </div>

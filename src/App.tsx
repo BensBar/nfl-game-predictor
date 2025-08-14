@@ -21,36 +21,36 @@ import { Target, ChartBar, Clock, Calendar, Database, Info, Activity, TrendingUp
 import { toast } from 'sonner'
 
 function App() {
-  const [selectedWeek, setSelectedWeek] = useState<number>(getCurrentWeek())
+  const currentWeek = getCurrentWeek()
   const [weekGames, setWeekGames] = useState<NFLGame[]>([])
   const [selectedGame, setSelectedGame] = useState<NFLGame | null>(null)
   const [currentPrediction, setCurrentPrediction] = useState<Prediction | null>(null)
   const [predictions, setPredictions] = useKV<PredictionHistory[]>('prediction-history', [])
 
   useEffect(() => {
-    const loadGames = async () => {
+    const loadCurrentWeekGames = async () => {
       try {
-        console.log(`Loading games for week ${selectedWeek}...`)
-        const games = await getGamesForWeek(selectedWeek)
-        console.log(`Loaded ${games?.length || 0} games for week ${selectedWeek}`)
+        console.log(`Loading games for current week ${currentWeek}...`)
+        const games = await getGamesForWeek(currentWeek)
+        console.log(`Loaded ${games?.length || 0} games for current week ${currentWeek}`)
         setWeekGames(Array.isArray(games) ? games : [])
         setSelectedGame(null)
         setCurrentPrediction(null)
       } catch (error) {
-        console.error('Error loading games for week:', selectedWeek, error)
+        console.error('Error loading current week games:', currentWeek, error)
         setWeekGames([])
         setSelectedGame(null)
         setCurrentPrediction(null)
-        toast.error(`Error loading games for week ${selectedWeek < 0 ? `Preseason ${Math.abs(selectedWeek)}` : selectedWeek}`)
+        toast.error(`Error loading current week games`)
       }
     }
     
-    loadGames()
-  }, [selectedWeek])
+    loadCurrentWeekGames()
+  }, [])
 
   const handleWeekChange = (week: string) => {
-    const weekNum = parseInt(week)
-    setSelectedWeek(weekNum)
+    // Week changing is now disabled - only current week supported
+    console.log('Week changing disabled - only current week predictions supported')
   }
 
   const handleGameSelect = (gameId: string) => {
@@ -127,10 +127,6 @@ function App() {
   }
 
   const currentWeek = getCurrentWeek()
-  const weekOptions = [
-    ...Array.from({ length: 3 }, (_, i) => -(3 - i)), // Preseason weeks: -3, -2, -1  
-    ...Array.from({ length: 18 }, (_, i) => i + 1)    // Regular season: 1-18
-  ]
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,94 +140,33 @@ function App() {
           <p className="text-sm text-muted-foreground/80">
             • Live team statistics • Injury analysis • Weather impact • Multi-sportsbook odds comparison • Home field advantage
           </p>
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm font-medium text-blue-800">
+              🏈 Currently predicting: {currentWeek < 0 ? `Preseason Week ${Math.abs(currentWeek)}` : `Week ${currentWeek}`} games only
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              Focus on current week for maximum accuracy with real-time data
+            </p>
+          </div>
         </div>
 
+        {/* Enhanced Live Data Dashboard */}
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="text-primary" />
-              Select Week & Game
+              <Activity className="text-primary" />
+              Live NFL Data & Current Week Predictions
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">NFL Week</label>
-                <Select 
-                  value={selectedWeek.toString()} 
-                  onValueChange={handleWeekChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {weekOptions.map((week) => (
-                      <SelectItem key={week} value={week.toString()}>
-                        {week < 0 
-                          ? `Preseason Week ${Math.abs(week)}` 
-                          : `Week ${week}`
-                        } {week === currentWeek && '(Current)'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Game</label>
-                <Select 
-                  value={selectedGame?.id || ''} 
-                  onValueChange={handleGameSelect}
-                  disabled={(weekGames?.length || 0) === 0}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a game" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(weekGames || []).map((game) => (
-                      <SelectItem key={game.id} value={game.id}>
-                        {game.awayTeam.city} @ {game.homeTeam.city} ({game.gameTime})
-                        {game.isCompleted && ' - Completed'}
-                        {game.isPreseason && ' - Preseason'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex justify-center mt-6">
-              <Button 
-                onClick={handlePredict}
-                disabled={!selectedGame || selectedGame.isCompleted || isGeneratingPrediction}
-                size="lg"
-                className="min-w-32"
-              >
-                {isGeneratingPrediction ? 'Analyzing Teams...' : 'Generate Prediction'}
-              </Button>
-            </div>
-            
-            {/* Debug info */}
-            <div className="mt-4 space-y-2">
-              {weekGames && weekGames.length === 0 && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
-                  <strong>Debug:</strong> No games found for week {selectedWeek < 0 ? `Preseason ${Math.abs(selectedWeek)}` : selectedWeek}
-                </div>
-              )}
-              
-              {weekGames && weekGames.length > 0 && !selectedGame && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-                  <strong>Ready:</strong> {weekGames.length} games available for week {selectedWeek < 0 ? `Preseason ${Math.abs(selectedWeek)}` : selectedWeek}. Select one to generate predictions.
-                </div>
-              )}
-              
-              {selectedGame && (
-                <div className="p-3 bg-green-50 border border-green-200 rounded text-sm text-green-800">
-                  <strong>Selected:</strong> {selectedGame.awayTeam.city} @ {selectedGame.homeTeam.city} ({selectedGame.gameTime})
-                  {selectedGame.isPreseason && ' - Preseason Game'}
-                </div>
-              )}
-            </div>
+            <LiveDataDashboard 
+              currentWeekGames={weekGames}
+              selectedGame={selectedGame}
+              onGameSelect={setSelectedGame}
+              onPredict={handlePredict}
+              isGeneratingPrediction={isGeneratingPrediction}
+              currentWeek={currentWeek}
+            />
           </CardContent>
         </Card>
 
@@ -336,7 +271,7 @@ function App() {
 
               <TabsContent value="schedule">
                 <WeeklySchedule 
-                  week={selectedWeek}
+                  week={currentWeek}
                   games={Array.isArray(weekGames) ? weekGames : []}
                   selectedGame={selectedGame}
                   onGameSelect={handleGameSelect}
@@ -359,32 +294,19 @@ function App() {
 
         {!currentPrediction && (
           <div className="space-y-8">
-            {/* Live Data Dashboard */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="text-primary" />
-                  Live NFL Data Dashboard
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <LiveDataDashboard />
-              </CardContent>
-            </Card>
-
             {Array.isArray(weekGames) && weekGames.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle>
-                    {selectedWeek < 0 
-                      ? `Preseason Week ${Math.abs(selectedWeek)} Games` 
-                      : `Week ${selectedWeek} Games`
+                    {currentWeek < 0 
+                      ? `Preseason Week ${Math.abs(currentWeek)} Games` 
+                      : `Week ${currentWeek} Games`
                     }
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <WeeklySchedule 
-                    week={selectedWeek}
+                    week={currentWeek}
                     games={Array.isArray(weekGames) ? weekGames : []}
                     selectedGame={selectedGame}
                     onGameSelect={handleGameSelect}
@@ -400,8 +322,8 @@ function App() {
               </h3>
               <p className="text-muted-foreground">
                 {selectedGame 
-                  ? 'Click "Generate Prediction" to analyze this matchup'
-                  : 'Select a week and game to generate predictions'
+                  ? 'Use the "Generate Prediction" button in the Live Data Dashboard above'
+                  : 'Select a game from the Live Data Dashboard to generate predictions'
                 }
               </p>
             </div>

@@ -415,28 +415,21 @@ export class RealSportsAPI {
   }
 
   private async getInjuriesFromAPI(teamId: string): Promise<any[]> {
-    // Simulate realistic injury data
+    // In production, this would fetch from real NFL injury report APIs
+    // For now, we'll return an empty array to avoid fake player names
     await new Promise(resolve => setTimeout(resolve, 50))
     
-    const positions = ['QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S']
-    const injuries = ['Knee', 'Ankle', 'Shoulder', 'Hamstring', 'Concussion']
-    const statuses = ['Out', 'Doubtful', 'Questionable']
+    // Real NFL injury data would come from:
+    // - ESPN NFL API injury reports
+    // - NFL.com official injury reports  
+    // - FantasyPros injury tracking
+    // - Team official announcements
     
-    const numInjuries = Math.floor(Math.random() * 4)
-    const injuryReport = []
+    console.log(`📋 Real injury API call would be made for team: ${teamId}`)
+    console.log('🔗 Sources: ESPN, NFL.com, FantasyPros, Team Official Reports')
     
-    for (let i = 0; i < numInjuries; i++) {
-      injuryReport.push({
-        player: `Player ${i + 1}`,
-        position: positions[Math.floor(Math.random() * positions.length)],
-        injury: injuries[Math.floor(Math.random() * injuries.length)],
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        severityRating: Math.floor(Math.random() * 5) + 1,
-        lastUpdate: new Date().toISOString()
-      })
-    }
-    
-    return injuryReport
+    // Return empty array until real API is integrated
+    return []
   }
 
   private async getWeatherFromAPI(location: string): Promise<any> {
