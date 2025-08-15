@@ -36,7 +36,7 @@ export const ErrorFallback = ({ error, resetErrorBoundary }: ErrorFallbackProps)
           className="w-full"
           variant="outline"
         >
-          <ArrowClockwiseIcon />
+          <RotateCcw className="mr-2 h-4 w-4" />
           Try Again
         </Button>
       </div>
